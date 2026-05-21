@@ -15,28 +15,31 @@ class RegisterStudentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'father_name' => ['nullable', 'string', 'max:255'],
-            'university_roll_no' => ['nullable', 'string', 'max:50'],
-            'college_roll_no' => ['nullable', 'string', 'max:50'],
-            'subject' => ['nullable', 'string', 'max:100'],
-            'semester' => ['nullable', 'string', 'max:20'],
+            'registration_no' => ['required', 'string', 'max:50', 'unique:students,registration_no'],
+            'name' => ['required', 'string', 'min:2', 'max:255'],
+            'father_name' => ['required', 'string', 'max:255'],
+            'university_roll_no' => ['required', 'string', 'max:50'],
+            'college_roll_no' => ['required', 'string', 'max:50'],
+            'college_name' => ['required', 'string', 'max:255'],
+            'subject' => ['required', 'string', 'max:100'],
             'mobile' => ['required', 'digits:10'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'internship_mode' => ['required', Rule::in(['online', 'offline'])],
-            'address' => ['nullable', 'string', 'max:1000'],
-            'photo' => ['nullable', 'image', 'max:2048'],
-            'id_proof' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+            'internship_mode' => ['nullable', Rule::in(['online', 'offline'])],
         ];
     }
 
     public function messages(): array
     {
         return [
+            'registration_no.required' => 'Registration number is required.',
+            'registration_no.unique' => 'This registration number is already registered.',
             'name.required' => 'Student name is required.',
+            'father_name.required' => "Father's name is required.",
+            'university_roll_no.required' => 'University roll number is required.',
+            'college_roll_no.required' => 'College roll number is required.',
+            'college_name.required' => 'College name is required.',
+            'subject.required' => 'Subject is required.',
             'mobile.required' => 'Mobile number is required.',
             'mobile.digits' => 'Mobile number must be exactly 10 digits.',
-            'internship_mode.required' => 'Please select internship mode.',
         ];
     }
 }

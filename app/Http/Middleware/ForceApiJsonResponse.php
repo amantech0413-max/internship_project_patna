@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Ensures API routes always expect JSON (Nuxt admin + Flutter mobile).
+ * Ensures API routes always expect JSON (Vue admin + Flutter mobile).
  * Prevents redirect to undefined web "login" route on 401.
  */
 class ForceApiJsonResponse

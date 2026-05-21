@@ -30,11 +30,7 @@ class AuthController extends Controller
 
     public function register(RegisterStudentRequest $request): JsonResponse
     {
-        $student = $this->students->register(
-            $request->validated(),
-            $request->file('photo'),
-            $request->file('id_proof')
-        );
+        $student = $this->students->register($request->validated());
 
         return $this->success(
             new \App\Http\Resources\StudentResource($student),

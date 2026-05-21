@@ -1,16 +1,25 @@
 {
-  "name": "bli-internship-monorepo",
+  "name": "bli-internship",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "npm run dev --prefix frontend",
-    "build": "npm run build --prefix frontend",
-    "generate": "npm run generate --prefix frontend",
-    "preview": "npm run preview --prefix frontend",
-    "postinstall": "npm install --prefix frontend",
+    "dev": "vite",
+    "build": "vite build",
     "api": "php artisan serve",
-    "queue": "php artisan queue:work",
-    "admin:dev": "npm run dev --prefix frontend",
-    "admin:build": "npm run build --prefix frontend",
-    "setup": "composer install && php artisan migrate:fresh --seed && php artisan storage:link && npm install --prefix frontend"
+    "queue": "php artisan queue:work"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "axios": "^1.8.4",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
+    "pinia": "^3.0.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "laravel-vite-plugin": "^1.2.0",
+    "vite": "^6.2.4"
   }
 }

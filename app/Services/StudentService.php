@@ -16,10 +16,12 @@ class StudentService
         protected StudentRepositoryInterface $students
     ) {}
 
-    /** Public self-registration — no login, no college, no added_by. */
-    public function register(array $data, ?UploadedFile $photo = null, ?UploadedFile $idProof = null): Student
+    /** Public self-registration — no login, no added_by; documents optional via admin later. */
+    public function register(array $data): Student
     {
-        return $this->createStudentRecord($data, $photo, $idProof, StudentStatus::Pending, null);
+        $data['internship_mode'] = $data['internship_mode'] ?? InternshipMode::Online->value;
+
+        return $this->createStudentRecord($data, null, null, StudentStatus::Pending, null);
     }
 
     /** Admin/staff full student create — sets added_by (created_by). */
@@ -65,6 +67,7 @@ class StudentService
                 'college_id' => $data['college_id'] ?? null,
                 'created_by' => $createdBy,
                 'student_code' => StudentCodeGenerator::generateStudentCode(),
+                'registration_no' => $data['registration_no'] ?? null,
                 'student_name' => $data['name'] ?? $data['student_name'],
                 'father_name' => $data['father_name'] ?? null,
                 'university_roll_no' => $data['university_roll_no'] ?? null,
@@ -161,7 +164,14 @@ class StudentService
 
     protected function isProfileComplete(array $data, ?UploadedFile $photo, ?UploadedFile $idProof): bool
     {
-        $required = ['father_name', 'subject', 'semester', 'address'];
+        $required = [
+            'registration_no',
+            'father_name',
+            'university_roll_no',
+            'college_roll_no',
+            'college_name',
+            'subject',
+        ];
 
         foreach ($required as $field) {
             if (empty($data[$field])) {
@@ -169,7 +179,6 @@ class StudentService
             }
         }
 
-        return ($photo || ! empty($data['photo_path']))
-            && ($idProof || ! empty($data['id_proof_path']));
+        return true;
     }
 }

@@ -2,7 +2,7 @@
 
 **Organization:** M/s Bhagya Laxmi — Mohali, Chandigarh
 
-Monorepo with **Laravel 12 REST API** + **Nuxt 3 Admin Panel** in one repository, designed for **Flutter** mobile app integration.
+Monorepo with **Laravel 12 REST API** + **Vue 3 admin panel** (Vite, Bootstrap 5) in one repository, designed for **Flutter** mobile app integration.
 
 ## Project Structure
 
@@ -11,7 +11,8 @@ internship_program/
 ├── app/                    # Laravel application (API, services, jobs, observers)
 ├── database/               # Migrations & seeders
 ├── routes/api.php          # API v1 routes
-├── frontend/               # Nuxt.js admin panel
+├── resources/js/admin/     # Vue 3 admin SPA
+├── resources/views/admin.blade.php
 ├── docs/                   # Postman collection
 └── README.md
 ```
@@ -77,38 +78,28 @@ API endpoints:
 - `GET /api/v1/admin/whatsapp/messages` — message logs
 - `POST /api/v1/admin/whatsapp/messages/retry-failed` — retry failed
 
-### 3. Admin frontend (Nuxt — lives in `frontend/`)
+### 3. Admin frontend (Vue 3 + Vite)
 
-This repo is a monorepo: **Laravel root** has PHP/API; **Nuxt admin** is in `frontend/`.  
-Do not run `npm run build` expecting Nuxt unless you use the commands below.
+Admin UI source: `resources/js/admin/`. Served at **`/admin`** via Laravel (`resources/views/admin.blade.php`).
 
-**Development** (from project root OR from `frontend/`):
+**Development** (two terminals, project root):
 
 ```bash
-# Option A — from Laravel root (recommended)
-npm install          # installs frontend deps via postinstall
-npm run dev          # starts Nuxt dev server
-
-# Option B — from frontend folder
-cd frontend
 npm install
-cp .env.example .env   # set NUXT_PUBLIC_API_BASE=http://localhost:8000/api/v1
-npm run dev
+php artisan serve          # terminal 1 — http://127.0.0.1:8000
+npm run dev                # terminal 2 — Vite HMR
 ```
 
-Open: http://localhost:3000
+Open: http://127.0.0.1:8000/admin/login  
+Public registration: http://127.0.0.1:8000/admin/register
 
-**Production build**:
+**Production build** (CI commits `public/build`; server only `git pull`):
 
 ```bash
-# From project root
 npm run build
-
-# Or explicitly
-cd frontend && npm install && npm run build
 ```
 
-Output: `frontend/.output/` (Nitro server). Preview with `npm run preview` (from root or `frontend/`).
+Build output: `public/build/` (committed by CI on deploy).
 
 ### Default accounts (after seed)
 
@@ -116,7 +107,9 @@ Output: `frontend/.output/` (Nitro server). Preview with `npm run preview` (from
 |-------------|-------------------------------|-----------|
 | Super Admin | superadmin@bhagyalaxmi.local  | password  |
 | Admin       | admin@bhagyalaxmi.local       | password  |
-| Student     | REG2026001 or BLI2026S001     | password  |
+| Staff       | staff@bhagyalaxmi.local       | password  |
+
+> Students register publicly (no login). Staff use `/admin/login`.
 
 > Two seeded students share mobile `9999999999` (sibling demo).
 
@@ -193,7 +186,7 @@ Import **`docs/postman_collection.json`** into Postman.
 ## Production
 
 ```bash
-cd frontend && npm run build
+npm ci && npm run build
 php artisan config:cache
 php artisan route:cache
 ```

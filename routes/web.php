@@ -2,22 +2,23 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/admin/{path?}', function () {
-    $index = base_path('frontend/.output/public/index.html');
+/*
+| Vue 3 admin SPA (Laravel + Vite) — source: resources/js/admin
+| URLs: /admin/login, /admin/dashboard, /admin/register, etc.
+*/
 
-    if (file_exists($index)) {
-        return file_get_contents($index);
-    }
+Route::get('/register', fn () => redirect('/admin/register'));
 
-    return redirect('http://localhost:3000');
-})->where('path', '.*');
+Route::get('/admin/{any?}', function () {
+    return view('admin');
+})->where('any', '.*');
 
 Route::get('/', function () {
     return response()->json([
-        'app' => config('bli.name'),
-        'organization' => config('bli.organization'),
+        'app' => config('app.name'),
         'api' => url('/api/v1'),
-        'admin' => url('/admin'),
-        'docs' => 'See README.md and docs/postman_collection.json',
+        'admin_panel' => url('/admin'),
+        'admin_login' => url('/admin/login'),
+        'student_register' => url('/admin/register'),
     ]);
 });

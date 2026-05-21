@@ -16,6 +16,7 @@ class Student extends Model
         'created_by',
         'user_id',
         'student_code',
+        'registration_no',
         'student_name',
         'father_name',
         'university_roll_no',

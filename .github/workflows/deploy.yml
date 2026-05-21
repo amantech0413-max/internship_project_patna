@@ -1,0 +1,140 @@
+# CI/CD — Laravel API + Vue 3 admin (Vite build committed to public/build)
+#
+# Flow:
+#   1. Backend tests
+#   2. npm run build → public/build → commit & push (main only)
+#   3. Server: git pull only — NO npm build on server
+#
+# Secrets: SERVER_HOST, SERVER_USER, SERVER_SSH_KEY, DEPLOY_PATH
+# Optional: SERVER_PASSWORD, SERVER_PORT
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - 'public/build/**'
+      - '**.md'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PHP_VERSION: "8.2"
+  NODE_VERSION: "20"
+
+jobs:
+  backend-ci:
+    name: Backend CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, ctype, json, pdo, pdo_sqlite, fileinfo, tokenizer, openssl, curl, zip
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Prepare Laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+
+      - run: php artisan migrate --force
+      - run: php artisan test
+
+  frontend-build:
+    name: Build Admin (Vite → public/build)
+    runs-on: ubuntu-latest
+    needs: backend-ci
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install & build Vue admin
+        run: |
+          npm ci
+          npm run build
+
+      - name: Commit Vite build to git
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A public/build
+          if git diff --staged --quiet; then
+            echo "No build changes to commit."
+          else
+            git commit -m "chore(ci): update admin Vite build [public/build]"
+            git push
+          fi
+
+      - name: Verify build on pull request
+        if: github.event_name == 'pull_request'
+        run: |
+          test -f public/build/manifest.json || (echo "Missing public/build/manifest.json" && exit 1)
+          echo "Vite admin build OK (not committed on PR)."
+
+  deploy:
+    name: Deploy (git pull only)
+    runs-on: ubuntu-latest
+    needs: [backend-ci, frontend-build]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script_stop: true
+          command_timeout: 15m
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+
+            echo "==> Git pull (includes public/build)"
+            git fetch origin
+            git reset --hard origin/main 2>/dev/null || git reset --hard origin/master
+
+            echo "==> Laravel (no frontend build on server)"
+            composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+            php artisan migrate --force
+            php artisan storage:link 2>/dev/null || true
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan event:cache 2>/dev/null || true
+
+            chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
+            sudo systemctl reload php8.2-fpm 2>/dev/null || sudo systemctl reload php-fpm 2>/dev/null || true
+
+            echo "==> Done. Admin UI: /admin (Vite assets in public/build)"

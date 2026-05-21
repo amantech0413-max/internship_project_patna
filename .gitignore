@@ -1,22 +1,16 @@
 # Dependencies
 /node_modules
 /vendor
-/frontend/node_modules
-
 # Environment
 .env
 .env.*
 !.env.example
-/frontend/.env
-/frontend/.env.*
-!/frontend/.env.example
 
 # Laravel
 /bootstrap/cache/*
 !/bootstrap/cache/.gitignore
 /storage/*.key
 /storage/pail
-/public/build
 /public/hot
 /public/storage
 /storage/logs/*
@@ -34,11 +28,10 @@
 /storage/app/private/*
 !/storage/app/private/.gitignore
 
-# Nuxt / frontend build
-/frontend/.nuxt
-/frontend/.output
-/frontend/dist
-/frontend/.cache
+# Vite dev hot file
+# public/build/ — TRACKED in git (built by GitHub Actions or: npm run build)
+
+/public/admin
 
 # Testing & tools
 .phpunit.result.cache
