@@ -39,9 +39,8 @@
               <div v-if="errors.father_name" class="invalid-feedback d-block">{{ errors.father_name }}</div>
             </div>
             <div class="col-md-6">
-              <label class="form-label">University Roll No *</label>
-              <input v-model="form.university_roll_no" class="form-control" required />
-              <div v-if="errors.university_roll_no" class="invalid-feedback d-block">{{ errors.university_roll_no }}</div>
+              <label class="form-label">College Name</label>
+              <input :value="college?.shortName" class="form-control bg-light" readonly tabindex="-1" />
             </div>
             <div class="col-md-6">
               <label class="form-label">College Roll No *</label>
@@ -54,8 +53,9 @@
               <div v-if="errors.registration_no" class="invalid-feedback d-block">{{ errors.registration_no }}</div>
             </div>
             <div class="col-md-6">
-              <label class="form-label">College Name</label>
-              <input :value="college?.name" class="form-control bg-light" readonly tabindex="-1" />
+              <label class="form-label">University Roll No *</label>
+              <input v-model="form.university_roll_no" class="form-control" required />
+              <div v-if="errors.university_roll_no" class="invalid-feedback d-block">{{ errors.university_roll_no }}</div>
             </div>
             <div class="col-md-6">
               <label class="form-label">Subject *</label>
