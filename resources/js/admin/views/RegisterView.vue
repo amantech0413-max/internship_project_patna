@@ -1,88 +1,144 @@
 <template>
-  <div class="min-vh-100 d-flex align-items-center justify-content-center bg-light p-3">
-    <div class="w-100" style="max-width: 720px">
-      <div class="text-center mb-4">
-        <h1 class="h4 fw-bold text-primary">{{ PROGRAM_TITLE }}</h1>
-        <p v-if="college" class="fw-semibold text-dark mb-0 mt-2">{{ college.shortName }}</p>
+  <RegisterPageShell
+    :college-short-name="college?.shortName"
+    hero-title="Internship Jun 2026 Registration"
+    hero-description="Begin your professional journey with us. Fill out the form carefully to apply for the internship program."
+  >
+    <div v-if="success" class="register-card">
+      <div class="register-success">
+        <div class="register-success-icon"><i class="bi bi-check-lg" /></div>
+        <h2 class="h5 text-success fw-bold">Registration Submitted!</h2>
+        <p class="text-muted">{{ successMessage }}</p>
+        <div v-if="registeredStudent" class="register-success-details">
+          <p class="mb-1"><strong>College:</strong> {{ registeredStudent.college_name }}</p>
+          <p class="mb-1"><strong>Registration No:</strong> {{ registeredStudent.registration_no }}</p>
+          <p class="mb-1"><strong>Student Code:</strong> {{ registeredStudent.student_code }}</p>
+          <p class="mb-0"><strong>Name:</strong> {{ registeredStudent.student_name || registeredStudent.name }}</p>
+        </div>
+        <button type="button" class="reg-submit" style="max-width: 280px" @click="resetForm">
+          <i class="bi bi-plus-circle" /> Register Another
+        </button>
       </div>
-
-      <div v-if="success" class="card shadow border-success">
-        <div class="card-body text-center p-4">
-          <h2 class="h5 text-success">Registration Submitted!</h2>
-          <p class="text-muted">{{ successMessage }}</p>
-          <div v-if="registeredStudent" class="text-start bg-light rounded p-3 small mt-3">
-            <p class="mb-1"><strong>College:</strong> {{ registeredStudent.college_name }}</p>
-            <p class="mb-1"><strong>Registration No:</strong> {{ registeredStudent.registration_no }}</p>
-            <p class="mb-1"><strong>Student Code:</strong> {{ registeredStudent.student_code }}</p>
-            <p class="mb-0"><strong>Name:</strong> {{ registeredStudent.student_name || registeredStudent.name }}</p>
-          </div>
-          <button type="button" class="btn btn-primary mt-3" @click="resetForm">Register Another</button>
-        </div>
-      </div>
-
-      <form v-else class="card shadow" @submit.prevent="submit">
-        <div class="card-header bg-primary text-white">
-          <strong>Student Registration Form</strong>
-        </div>
-        <div class="card-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Name of the Student *</label>
-              <input v-model="form.name" class="form-control" required />
-              <div v-if="errors.name" class="invalid-feedback d-block">{{ errors.name }}</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Father's Name *</label>
-              <input v-model="form.father_name" class="form-control" required />
-              <div v-if="errors.father_name" class="invalid-feedback d-block">{{ errors.father_name }}</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">College Name</label>
-              <input :value="college?.shortName" class="form-control bg-light" readonly tabindex="-1" />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">College Roll No *</label>
-              <input v-model="form.college_roll_no" class="form-control" required />
-              <div v-if="errors.college_roll_no" class="invalid-feedback d-block">{{ errors.college_roll_no }}</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Registration No *</label>
-              <input v-model="form.registration_no" class="form-control" required />
-              <div v-if="errors.registration_no" class="invalid-feedback d-block">{{ errors.registration_no }}</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">University Roll No *</label>
-              <input v-model="form.university_roll_no" class="form-control" required />
-              <div v-if="errors.university_roll_no" class="invalid-feedback d-block">{{ errors.university_roll_no }}</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Subject *</label>
-              <input v-model="form.subject" class="form-control" required />
-              <div v-if="errors.subject" class="invalid-feedback d-block">{{ errors.subject }}</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Mobile No *</label>
-              <input v-model="form.mobile" class="form-control" maxlength="10" inputmode="numeric" required />
-              <div v-if="errors.mobile" class="invalid-feedback d-block">{{ errors.mobile }}</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Email ID <span class="text-muted fw-normal">(optional)</span></label>
-              <input v-model="form.email" type="email" class="form-control" />
-              <div v-if="errors.email" class="invalid-feedback d-block">{{ errors.email }}</div>
-            </div>
-          </div>
-          <p v-if="error" class="alert alert-danger mt-3 mb-0 small">{{ error }}</p>
-          <p v-if="fieldErrors" class="alert alert-danger mt-3 mb-0 small">{{ fieldErrors }}</p>
-          <button type="submit" class="btn btn-primary w-100 mt-3" :disabled="loading">
-            {{ loading ? 'Submitting...' : 'Submit Registration' }}
-          </button>
-          <p class="text-center small text-muted mt-3 mb-0 d-none" aria-hidden="true">
-            <router-link to="/login">Staff Login</router-link>
-          </p>
-        </div>
-      </form>
     </div>
-  </div>
+
+    <form v-else class="register-card" @submit.prevent="submit">
+      <div class="register-card-head">
+        <div class="register-card-head-icon"><i class="bi bi-person-fill" /></div>
+        <div>
+          <h2>Student Information</h2>
+          <p>Please fill in your details carefully</p>
+        </div>
+      </div>
+      <div class="register-card-body">
+        <div class="row g-3 g-md-4">
+          <div class="col-md-6">
+            <div class="reg-field" :class="{ 'has-error': errors.name }">
+              <label>Name of the Student *</label>
+              <div class="reg-input-wrap">
+                <i class="bi bi-person reg-input-icon" />
+                <input v-model="form.name" class="reg-input" placeholder="Enter your full name" required />
+              </div>
+              <div v-if="errors.name" class="reg-field-error">{{ errors.name }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="reg-field" :class="{ 'has-error': errors.father_name }">
+              <label>Father's Name *</label>
+              <div class="reg-input-wrap">
+                <i class="bi bi-person-badge reg-input-icon" />
+                <input v-model="form.father_name" class="reg-input" placeholder="Enter father's name" required />
+              </div>
+              <div v-if="errors.father_name" class="reg-field-error">{{ errors.father_name }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="reg-field">
+              <label>College Name</label>
+              <div class="reg-input-wrap">
+                <i class="bi bi-building reg-input-icon" />
+                <input :value="college?.shortName" class="reg-input" readonly tabindex="-1" />
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="reg-field" :class="{ 'has-error': errors.college_roll_no }">
+              <label>College Roll No *</label>
+              <div class="reg-input-wrap">
+                <i class="bi bi-hash reg-input-icon" />
+                <input v-model="form.college_roll_no" class="reg-input" placeholder="Enter college roll number" required />
+              </div>
+              <div v-if="errors.college_roll_no" class="reg-field-error">{{ errors.college_roll_no }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="reg-field" :class="{ 'has-error': errors.registration_no }">
+              <label>Registration No *</label>
+              <div class="reg-input-wrap">
+                <i class="bi bi-card-text reg-input-icon" />
+                <input v-model="form.registration_no" class="reg-input" placeholder="Enter registration number" required />
+              </div>
+              <div v-if="errors.registration_no" class="reg-field-error">{{ errors.registration_no }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="reg-field" :class="{ 'has-error': errors.university_roll_no }">
+              <label>University Roll No *</label>
+              <div class="reg-input-wrap">
+                <i class="bi bi-mortarboard reg-input-icon" />
+                <input v-model="form.university_roll_no" class="reg-input" placeholder="Enter university roll number" required />
+              </div>
+              <div v-if="errors.university_roll_no" class="reg-field-error">{{ errors.university_roll_no }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="reg-field" :class="{ 'has-error': errors.subject }">
+              <label>Subject *</label>
+              <div class="reg-input-wrap">
+                <i class="bi bi-journal-text reg-input-icon" />
+                <input v-model="form.subject" class="reg-input" placeholder="Enter your subject" required />
+              </div>
+              <div v-if="errors.subject" class="reg-field-error">{{ errors.subject }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="reg-field" :class="{ 'has-error': errors.mobile }">
+              <label>Mobile No *</label>
+              <div class="reg-input-wrap">
+                <i class="bi bi-telephone reg-input-icon" />
+                <input
+                  v-model="form.mobile"
+                  class="reg-input"
+                  placeholder="10 digit mobile number"
+                  maxlength="10"
+                  inputmode="numeric"
+                  required
+                />
+              </div>
+              <div v-if="errors.mobile" class="reg-field-error">{{ errors.mobile }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="reg-field" :class="{ 'has-error': errors.email }">
+              <label>Email ID <span class="text-muted fw-normal">(optional)</span></label>
+              <div class="reg-input-wrap">
+                <i class="bi bi-envelope reg-input-icon" />
+                <input v-model="form.email" type="email" class="reg-input" placeholder="Enter email address" />
+              </div>
+              <div v-if="errors.email" class="reg-field-error">{{ errors.email }}</div>
+            </div>
+          </div>
+        </div>
+
+        <p v-if="error" class="alert alert-danger mt-3 mb-0 small">{{ error }}</p>
+        <p v-if="fieldErrors" class="alert alert-danger mt-3 mb-0 small">{{ fieldErrors }}</p>
+
+        <button type="submit" class="reg-submit" :disabled="loading">
+          <i class="bi bi-send-fill" />
+          {{ loading ? 'Submitting...' : 'Submit Application' }}
+        </button>
+      </div>
+    </form>
+  </RegisterPageShell>
 </template>
 
 <script setup>
@@ -90,7 +146,8 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPublicApi } from '@/api/client'
 import { parseApiError } from '@/utils/apiHelpers'
-import { PROGRAM_TITLE, collegeBySlug } from '@/config/registrationColleges'
+import { collegeBySlug } from '@/config/registrationColleges'
+import RegisterPageShell from '@/components/RegisterPageShell.vue'
 
 const route = useRoute()
 const router = useRouter()

@@ -1,35 +1,33 @@
 <template>
-  <div class="min-vh-100 d-flex align-items-center justify-content-center bg-light p-3">
-    <div class="w-100" style="max-width: 640px">
-      <div class="text-center mb-4">
-        <h1 class="h4 fw-bold text-primary">{{ PROGRAM_TITLE }}</h1>
-        <p class="small text-muted mt-2">Apna college select karke registration form kholen</p>
-      </div>
-
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-          <strong>Select College</strong>
+  <RegisterPageShell
+    hero-title="Internship Jun 2026 Registration"
+    hero-description="Select your college below to open the student registration form."
+  >
+    <div class="register-card">
+      <div class="register-card-head">
+        <div class="register-card-head-icon"><i class="bi bi-building" /></div>
+        <div>
+          <h2>Select Your College</h2>
+          <p>Choose your institution to continue registration</p>
         </div>
-        <div class="list-group list-group-flush">
+      </div>
+      <ul class="register-college-list">
+        <li v-for="college in REGISTRATION_COLLEGES" :key="college.slug">
           <router-link
-            v-for="college in REGISTRATION_COLLEGES"
-            :key="college.slug"
             :to="{ name: 'register-college', params: { slug: college.slug } }"
-            class="list-group-item list-group-item-action py-3"
+            class="register-college-link"
           >
-            <i class="bi bi-building me-2 text-primary" />
-            {{ college.name }}
+            <i class="bi bi-mortarboard" />
+            <span>{{ college.shortName }}</span>
+            <i class="bi bi-chevron-right" />
           </router-link>
-        </div>
-      </div>
-
-      <p class="text-center small text-muted mt-3 mb-0 d-none" aria-hidden="true">
-        <router-link to="/login">Staff Login</router-link>
-      </p>
+        </li>
+      </ul>
     </div>
-  </div>
+  </RegisterPageShell>
 </template>
 
 <script setup>
-import { PROGRAM_TITLE, REGISTRATION_COLLEGES } from '@/config/registrationColleges'
+import { REGISTRATION_COLLEGES } from '@/config/registrationColleges'
+import RegisterPageShell from '@/components/RegisterPageShell.vue'
 </script>
