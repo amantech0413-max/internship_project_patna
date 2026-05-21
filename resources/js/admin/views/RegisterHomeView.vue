@@ -23,7 +23,7 @@
         </div>
       </div>
 
-      <p class="text-center small text-muted mt-3 mb-0">
+      <p class="text-center small text-muted mt-3 mb-0 d-none" aria-hidden="true">
         <router-link to="/login">Staff Login</router-link>
       </p>
     </div>

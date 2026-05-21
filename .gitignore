@@ -12,6 +12,7 @@
 /storage/*.key
 /storage/pail
 /public/hot
+/public/build/*
 /public/storage
 /storage/logs/*
 !/storage/logs/.gitignore

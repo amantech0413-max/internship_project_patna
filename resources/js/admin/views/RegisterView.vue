@@ -16,10 +16,7 @@
             <p class="mb-1"><strong>Student Code:</strong> {{ registeredStudent.student_code }}</p>
             <p class="mb-0"><strong>Name:</strong> {{ registeredStudent.student_name || registeredStudent.name }}</p>
           </div>
-          <button type="button" class="btn btn-primary mt-3 me-2" @click="resetForm">Register Another</button>
-          <router-link :to="{ name: 'register-college', params: { slug } }" class="btn btn-outline-secondary mt-3">
-            Same College
-          </router-link>
+          <button type="button" class="btn btn-primary mt-3" @click="resetForm">Register Another</button>
         </div>
       </div>
 
@@ -79,7 +76,7 @@
           <button type="submit" class="btn btn-primary w-100 mt-3" :disabled="loading">
             {{ loading ? 'Submitting...' : 'Submit Registration' }}
           </button>
-          <p class="text-center small text-muted mt-3 mb-0">
+          <p class="text-center small text-muted mt-3 mb-0 d-none" aria-hidden="true">
             <router-link to="/login">Staff Login</router-link>
           </p>
         </div>
