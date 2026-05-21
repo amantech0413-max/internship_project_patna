@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/stores/auth'
 
-const PUBLIC = ['login', 'register', 'home']
+const PUBLIC = ['login', 'register', 'register-college', 'home']
 
 const PERM_ROUTES = {
   colleges: 'college_manage',

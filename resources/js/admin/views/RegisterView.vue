@@ -2,8 +2,7 @@
   <div class="min-vh-100 d-flex align-items-center justify-content-center bg-light p-3">
     <div class="w-100" style="max-width: 720px">
       <div class="text-center mb-4">
-        <h1 class="h3 fw-bold text-primary">M/s Bhagya Laxmi</h1>
-        <p class="text-muted mb-0">Public Student Registration</p>
+        <h1 class="h4 fw-bold text-primary">{{ PROGRAM_TITLE }}</h1>
       </div>
 
       <div v-if="success" class="card shadow border-success">
@@ -11,25 +10,24 @@
           <h2 class="h5 text-success">Registration Submitted!</h2>
           <p class="text-muted">{{ successMessage }}</p>
           <div v-if="registeredStudent" class="text-start bg-light rounded p-3 small mt-3">
+            <p class="mb-1"><strong>College:</strong> {{ registeredStudent.college_name }}</p>
             <p class="mb-1"><strong>Registration No:</strong> {{ registeredStudent.registration_no }}</p>
             <p class="mb-1"><strong>Student Code:</strong> {{ registeredStudent.student_code }}</p>
             <p class="mb-0"><strong>Name:</strong> {{ registeredStudent.student_name || registeredStudent.name }}</p>
           </div>
-          <button type="button" class="btn btn-primary mt-3" @click="resetForm">Register Another</button>
+          <button type="button" class="btn btn-primary mt-3 me-2" @click="resetForm">Register Another</button>
+          <router-link :to="{ name: 'register-college', params: { slug } }" class="btn btn-outline-secondary mt-3">
+            Same College
+          </router-link>
         </div>
       </div>
 
       <form v-else class="card shadow" @submit.prevent="submit">
         <div class="card-header bg-primary text-white">
-          <strong>Student Internship Registration</strong>
+          <strong>Student Registration Form</strong>
         </div>
         <div class="card-body">
           <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Registration No *</label>
-              <input v-model="form.registration_no" class="form-control" required />
-              <div v-if="errors.registration_no" class="invalid-feedback d-block">{{ errors.registration_no }}</div>
-            </div>
             <div class="col-md-6">
               <label class="form-label">Name of the Student *</label>
               <input v-model="form.name" class="form-control" required />
@@ -51,9 +49,13 @@
               <div v-if="errors.college_roll_no" class="invalid-feedback d-block">{{ errors.college_roll_no }}</div>
             </div>
             <div class="col-md-6">
-              <label class="form-label">College Name *</label>
-              <input v-model="form.college_name" class="form-control" required />
-              <div v-if="errors.college_name" class="invalid-feedback d-block">{{ errors.college_name }}</div>
+              <label class="form-label">Registration No *</label>
+              <input v-model="form.registration_no" class="form-control" required />
+              <div v-if="errors.registration_no" class="invalid-feedback d-block">{{ errors.registration_no }}</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">College Name</label>
+              <input :value="college?.name" class="form-control bg-light" readonly tabindex="-1" />
             </div>
             <div class="col-md-6">
               <label class="form-label">Subject *</label>
@@ -64,6 +66,11 @@
               <label class="form-label">Mobile No *</label>
               <input v-model="form.mobile" class="form-control" maxlength="10" inputmode="numeric" required />
               <div v-if="errors.mobile" class="invalid-feedback d-block">{{ errors.mobile }}</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email ID <span class="text-muted fw-normal">(optional)</span></label>
+              <input v-model="form.email" type="email" class="form-control" />
+              <div v-if="errors.email" class="invalid-feedback d-block">{{ errors.email }}</div>
             </div>
           </div>
           <p v-if="error" class="alert alert-danger mt-3 mb-0 small">{{ error }}</p>
@@ -81,11 +88,29 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { getPublicApi } from '@/api/client'
 import { parseApiError } from '@/utils/apiHelpers'
+import { PROGRAM_TITLE, collegeBySlug } from '@/config/registrationColleges'
 
+const route = useRoute()
+const router = useRouter()
 const http = getPublicApi()
+
+const slug = computed(() => String(route.params.slug || ''))
+const college = computed(() => collegeBySlug(slug.value))
+
+watch(
+  () => slug.value,
+  (s) => {
+    if (!collegeBySlug(s)) {
+      router.replace({ name: 'register' })
+    }
+  },
+  { immediate: true }
+)
+
 const loading = ref(false)
 const error = ref('')
 const fieldErrors = ref('')
@@ -100,9 +125,9 @@ const initialForm = () => ({
   father_name: '',
   university_roll_no: '',
   college_roll_no: '',
-  college_name: '',
   subject: '',
   mobile: '',
+  email: '',
 })
 
 const form = reactive(initialForm())
@@ -110,12 +135,11 @@ const form = reactive(initialForm())
 const validateClient = () => {
   Object.keys(errors).forEach((k) => delete errors[k])
   const required = [
-    ['registration_no', 'Registration no is required.'],
     ['name', 'Student name is required (min 2 characters).'],
     ['father_name', "Father's name is required."],
     ['university_roll_no', 'University roll no is required.'],
     ['college_roll_no', 'College roll no is required.'],
-    ['college_name', 'College name is required.'],
+    ['registration_no', 'Registration no is required.'],
     ['subject', 'Subject is required.'],
   ]
   for (const [key, msg] of required) {
@@ -127,10 +151,14 @@ const validateClient = () => {
   if (!/^\d{10}$/.test(form.mobile.replace(/\D/g, ''))) {
     errors.mobile = 'Mobile number must be exactly 10 digits.'
   }
+  if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+    errors.email = 'Enter a valid email address.'
+  }
   return Object.keys(errors).length === 0
 }
 
 const submit = async () => {
+  if (!college.value) return
   error.value = ''
   fieldErrors.value = ''
   if (!validateClient()) return
@@ -138,15 +166,16 @@ const submit = async () => {
   loading.value = true
   try {
     const payload = {
+      college_slug: slug.value,
       registration_no: form.registration_no.trim(),
       name: form.name.trim(),
       father_name: form.father_name.trim(),
       university_roll_no: form.university_roll_no.trim(),
       college_roll_no: form.college_roll_no.trim(),
-      college_name: form.college_name.trim(),
       subject: form.subject.trim(),
       mobile: form.mobile.replace(/\D/g, ''),
     }
+    if (form.email.trim()) payload.email = form.email.trim()
 
     const res = await http.post('/auth/register', payload)
     const body = res.data

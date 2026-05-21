@@ -1,6 +1,6 @@
 {
-  "_apiHelpers-BoiuXEpJ.js": {
-    "file": "assets/apiHelpers-BoiuXEpJ.js",
+  "_apiHelpers-DYXVY2VY.js": {
+    "file": "assets/apiHelpers-DYXVY2VY.js",
     "name": "apiHelpers",
     "imports": [
       "resources/js/admin/main.js"
@@ -10,22 +10,26 @@
     "file": "assets/bootstrap.esm-D7Q7Nh7Y.js",
     "name": "bootstrap.esm"
   },
-  "_client-CLt3UQPc.js": {
-    "file": "assets/client-CLt3UQPc.js",
+  "_client-DXdHSxxg.js": {
+    "file": "assets/client-DXdHSxxg.js",
     "name": "client",
     "imports": [
       "resources/js/admin/main.js"
     ]
   },
+  "_registrationColleges-Bf2uKli0.js": {
+    "file": "assets/registrationColleges-Bf2uKli0.js",
+    "name": "registrationColleges"
+  },
   "_studentForm-BhwhwU_p.js": {
     "file": "assets/studentForm-BhwhwU_p.js",
     "name": "studentForm"
   },
-  "_useWhatsapp-BlH1PGng.js": {
-    "file": "assets/useWhatsapp-BlH1PGng.js",
+  "_useWhatsapp-3KFN2ql8.js": {
+    "file": "assets/useWhatsapp-3KFN2ql8.js",
     "name": "useWhatsapp",
     "imports": [
-      "_client-CLt3UQPc.js"
+      "_client-DXdHSxxg.js"
     ]
   },
   "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff": {
@@ -42,17 +46,17 @@
     "isEntry": true
   },
   "resources/js/admin/layouts/AdminLayout.vue": {
-    "file": "assets/AdminLayout-Co6NqdiV.js",
+    "file": "assets/AdminLayout-DnofjXdX.js",
     "name": "AdminLayout",
     "src": "resources/js/admin/layouts/AdminLayout.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js"
+      "_client-DXdHSxxg.js"
     ]
   },
   "resources/js/admin/layouts/BlankLayout.vue": {
-    "file": "assets/BlankLayout-PjBIUl7S.js",
+    "file": "assets/BlankLayout-k4E9h3-c.js",
     "name": "BlankLayout",
     "src": "resources/js/admin/layouts/BlankLayout.vue",
     "isDynamicEntry": true,
@@ -61,13 +65,14 @@
     ]
   },
   "resources/js/admin/main.js": {
-    "file": "assets/main-Jms9B5IE.js",
+    "file": "assets/main-CwbyGuDe.js",
     "name": "main",
     "src": "resources/js/admin/main.js",
     "isEntry": true,
     "dynamicImports": [
       "resources/js/admin/layouts/BlankLayout.vue",
       "resources/js/admin/views/LoginView.vue",
+      "resources/js/admin/views/RegisterHomeView.vue",
       "resources/js/admin/views/RegisterView.vue",
       "resources/js/admin/layouts/AdminLayout.vue",
       "resources/js/admin/views/DashboardView.vue",
@@ -90,213 +95,224 @@
     ]
   },
   "resources/js/admin/views/CertificatesView.vue": {
-    "file": "assets/CertificatesView-Bc9SHZoS.js",
+    "file": "assets/CertificatesView-DBT830UL.js",
     "name": "CertificatesView",
     "src": "resources/js/admin/views/CertificatesView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js"
+      "_client-DXdHSxxg.js"
     ]
   },
   "resources/js/admin/views/CollegesView.vue": {
-    "file": "assets/CollegesView-CadF0b2k.js",
+    "file": "assets/CollegesView-CILiRsWE.js",
     "name": "CollegesView",
     "src": "resources/js/admin/views/CollegesView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js",
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js",
       "_bootstrap.esm-D7Q7Nh7Y.js"
     ]
   },
   "resources/js/admin/views/DashboardView.vue": {
-    "file": "assets/DashboardView-VZzOhyWr.js",
+    "file": "assets/DashboardView-Cwk3awem.js",
     "name": "DashboardView",
     "src": "resources/js/admin/views/DashboardView.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js",
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js",
       "resources/js/admin/main.js"
     ]
   },
   "resources/js/admin/views/EntryView.vue": {
-    "file": "assets/EntryView-N5MM9jkQ.js",
+    "file": "assets/EntryView-BMqscVve.js",
     "name": "EntryView",
     "src": "resources/js/admin/views/EntryView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js",
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js",
       "_bootstrap.esm-D7Q7Nh7Y.js"
     ]
   },
   "resources/js/admin/views/GroupCreateView.vue": {
-    "file": "assets/GroupCreateView-GjOF7N5m.js",
+    "file": "assets/GroupCreateView-CkbAoQ3K.js",
     "name": "GroupCreateView",
     "src": "resources/js/admin/views/GroupCreateView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js"
+      "_client-DXdHSxxg.js"
     ]
   },
   "resources/js/admin/views/GroupEditView.vue": {
-    "file": "assets/GroupEditView-CDyd0bH6.js",
+    "file": "assets/GroupEditView-BFFRq4VW.js",
     "name": "GroupEditView",
     "src": "resources/js/admin/views/GroupEditView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_useWhatsapp-BlH1PGng.js"
+      "_client-DXdHSxxg.js",
+      "_useWhatsapp-3KFN2ql8.js"
     ]
   },
   "resources/js/admin/views/GroupsIndexView.vue": {
-    "file": "assets/GroupsIndexView-DVitWUJV.js",
+    "file": "assets/GroupsIndexView-C0psboxr.js",
     "name": "GroupsIndexView",
     "src": "resources/js/admin/views/GroupsIndexView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js"
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js"
     ]
   },
   "resources/js/admin/views/ImportLogsView.vue": {
-    "file": "assets/ImportLogsView-JOx66w34.js",
+    "file": "assets/ImportLogsView-C5R016jv.js",
     "name": "ImportLogsView",
     "src": "resources/js/admin/views/ImportLogsView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js"
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js"
     ]
   },
   "resources/js/admin/views/LoginView.vue": {
-    "file": "assets/LoginView-Cp5hYTv9.js",
+    "file": "assets/LoginView-WR-gtN1t.js",
     "name": "LoginView",
     "src": "resources/js/admin/views/LoginView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js"
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js"
     ]
   },
   "resources/js/admin/views/NotificationsView.vue": {
-    "file": "assets/NotificationsView-C3qqrNos.js",
+    "file": "assets/NotificationsView-DknvqVge.js",
     "name": "NotificationsView",
     "src": "resources/js/admin/views/NotificationsView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js"
+      "_client-DXdHSxxg.js"
+    ]
+  },
+  "resources/js/admin/views/RegisterHomeView.vue": {
+    "file": "assets/RegisterHomeView-kJEoACNJ.js",
+    "name": "RegisterHomeView",
+    "src": "resources/js/admin/views/RegisterHomeView.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_registrationColleges-Bf2uKli0.js",
+      "resources/js/admin/main.js"
     ]
   },
   "resources/js/admin/views/RegisterView.vue": {
-    "file": "assets/RegisterView-DT7U_gLO.js",
+    "file": "assets/RegisterView-DoG7YRA6.js",
     "name": "RegisterView",
     "src": "resources/js/admin/views/RegisterView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js"
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js",
+      "_registrationColleges-Bf2uKli0.js"
     ]
   },
   "resources/js/admin/views/ReportsView.vue": {
-    "file": "assets/ReportsView-DagPPlhC.js",
+    "file": "assets/ReportsView-CtA0y69r.js",
     "name": "ReportsView",
     "src": "resources/js/admin/views/ReportsView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js"
+      "_client-DXdHSxxg.js"
     ]
   },
   "resources/js/admin/views/SettingsView.vue": {
-    "file": "assets/SettingsView-Bj1hfJG8.js",
+    "file": "assets/SettingsView-CP3CmhZ_.js",
     "name": "SettingsView",
     "src": "resources/js/admin/views/SettingsView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js"
+      "_client-DXdHSxxg.js"
     ]
   },
   "resources/js/admin/views/StaffUsersView.vue": {
-    "file": "assets/StaffUsersView-r80jjK5r.js",
+    "file": "assets/StaffUsersView-DLWRZALh.js",
     "name": "StaffUsersView",
     "src": "resources/js/admin/views/StaffUsersView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js",
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js",
       "_bootstrap.esm-D7Q7Nh7Y.js"
     ]
   },
   "resources/js/admin/views/StudentCreateView.vue": {
-    "file": "assets/StudentCreateView-xcXVTvyj.js",
+    "file": "assets/StudentCreateView-CGsvhD8o.js",
     "name": "StudentCreateView",
     "src": "resources/js/admin/views/StudentCreateView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js",
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js",
       "_studentForm-BhwhwU_p.js"
     ]
   },
   "resources/js/admin/views/StudentEditView.vue": {
-    "file": "assets/StudentEditView-BxalSqDq.js",
+    "file": "assets/StudentEditView-lLPfM76H.js",
     "name": "StudentEditView",
     "src": "resources/js/admin/views/StudentEditView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js",
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js",
       "_studentForm-BhwhwU_p.js"
     ]
   },
   "resources/js/admin/views/StudentEntriesView.vue": {
-    "file": "assets/StudentEntriesView-tNFp9kYU.js",
+    "file": "assets/StudentEntriesView-do9D6vCS.js",
     "name": "StudentEntriesView",
     "src": "resources/js/admin/views/StudentEntriesView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js"
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js"
     ]
   },
   "resources/js/admin/views/StudentsIndexView.vue": {
-    "file": "assets/StudentsIndexView-UyaIs1Gp.js",
+    "file": "assets/StudentsIndexView-DcB2eltr.js",
     "name": "StudentsIndexView",
     "src": "resources/js/admin/views/StudentsIndexView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js"
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js"
     ]
   },
   "resources/js/admin/views/WhatsappView.vue": {
-    "file": "assets/WhatsappView-D-PUqdWF.js",
+    "file": "assets/WhatsappView-CNP2_O8I.js",
     "name": "WhatsappView",
     "src": "resources/js/admin/views/WhatsappView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_client-CLt3UQPc.js",
-      "_apiHelpers-BoiuXEpJ.js",
-      "_useWhatsapp-BlH1PGng.js"
+      "_client-DXdHSxxg.js",
+      "_apiHelpers-DYXVY2VY.js",
+      "_useWhatsapp-3KFN2ql8.js"
     ]
   }
 }

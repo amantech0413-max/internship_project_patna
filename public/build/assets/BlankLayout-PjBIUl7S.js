@@ -1,1 +1,0 @@
-import{b as c,l as s,i as _}from"./main-Jms9B5IE.js";const a=(e,t)=>{const o=e.__vccOpts||e;for(const[r,n]of t)o[r]=n;return o},f={};function l(e,t){const o=s("router-view");return _(),c(o)}const u=a(f,[["render",l]]);export{u as default};

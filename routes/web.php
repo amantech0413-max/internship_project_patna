@@ -7,7 +7,13 @@ use Illuminate\Support\Facades\Route;
 | URLs: /admin/login, /admin/dashboard, /admin/register, etc.
 */
 
-Route::get('/register', fn () => redirect('/admin/register'));
+Route::get('/register/{slug?}', function (?string $slug = null) {
+    if ($slug) {
+        return redirect('/admin/register/'.$slug);
+    }
+
+    return redirect('/admin/register');
+})->where('slug', '[a-z0-9\-]+');
 
 Route::get('/admin/{any?}', function () {
     return view('admin');
