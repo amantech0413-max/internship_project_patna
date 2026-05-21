@@ -5,7 +5,7 @@
       <p class="small text-white-50 mb-0">Internship Management</p>
     </div>
 
-    <nav class="nav flex-column flex-grow-1 overflow-y-auto pb-2" style="max-height: calc(100vh - 7rem); -webkit-overflow-scrolling: touch">
+    <nav class="nav admin-nav flex-column flex-grow-1 overflow-y-auto pb-2">
       <template v-for="section in visibleSections" :key="section.title">
         <p class="small text-white-50 text-uppercase mt-3 mb-1 px-2">{{ section.title }}</p>
         <NuxtLink

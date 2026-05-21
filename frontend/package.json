@@ -6,6 +6,7 @@
     "dev": "nuxt dev",
     "build": "nuxt build",
     "generate": "nuxt generate",
+    "generate:git": "nuxt generate && node ../scripts/copy-admin-build.mjs",
     "preview": "nuxt preview"
   },
   "dependencies": {
