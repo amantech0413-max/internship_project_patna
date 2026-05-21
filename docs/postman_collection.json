@@ -1,0 +1,113 @@
+{
+  "info": {
+    "name": "BLI Internship Management API v1",
+    "description": "M/s Bhagya Laxmi — Admin-controlled WhatsApp + Flutter APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api/v1" },
+    { "key": "token", "value": "" },
+    { "key": "group_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"login\":\"admin@bhagyalaxmi.local\",\"password\":\"password\"}"
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Student Login (Registration No)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"login\":\"REG2026001\",\"password\":\"password\"}"
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Internship Groups",
+      "item": [
+        {
+          "name": "List Groups",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/admin/groups?internship_mode=online"
+          }
+        },
+        {
+          "name": "Assign Students",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student_ids\":[1,2]}"
+            },
+            "url": "{{base_url}}/admin/groups/{{group_id}}/assign"
+          }
+        },
+        {
+          "name": "Send WhatsApp Invitations",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"student_ids\":[1,2],\"resend\":false}"
+            },
+            "url": "{{base_url}}/admin/groups/{{group_id}}/whatsapp/send"
+          }
+        }
+      ]
+    },
+    {
+      "name": "WhatsApp Logs",
+      "item": [
+        {
+          "name": "Message History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/admin/whatsapp/messages"
+          }
+        },
+        {
+          "name": "Retry Failed",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/admin/whatsapp/messages/retry-failed"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student (Flutter)",
+      "item": [
+        {
+          "name": "Assigned Group + WhatsApp",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/student/group"
+          }
+        }
+      ]
+    }
+  ]
+}
