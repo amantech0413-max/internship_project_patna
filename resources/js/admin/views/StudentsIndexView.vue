@@ -126,7 +126,7 @@ const rows = computed(() =>
     student_code: s.student_code || '—',
     name: s.name || s.student_name,
     mobile: s.mobile || s.mobile_number,
-    college_name: s.college_name || (s.college )?.college_name || '—',
+    college_name: s.college_name || s.college?.college_name || '—',
     internship_mode: s.internship_mode || '—',
     status: s.status,
   }))

@@ -44,8 +44,8 @@
               <td>{{ rowIndex(idx) }}</td>
               <td class="fw-medium">{{ row.student_name }}</td>
               <td>{{ row.mobile_number }}</td>
-              <td>{{ (row.college )?.college_name || '—' }}</td>
-              <td>{{ (row.added_by_user )?.name || (row.creator )?.name || '—' }}</td>
+              <td>{{ row.college?.college_name || '—' }}</td>
+              <td>{{ row.added_by_user?.name || row.creator?.name || '—' }}</td>
               <td>{{ formatDate(row.created_at) }}</td>
             </tr>
             <tr v-if="!rows.length && !pending">

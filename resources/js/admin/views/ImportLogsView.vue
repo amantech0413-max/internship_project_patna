@@ -34,7 +34,7 @@
           <tbody>
             <tr v-for="row in rows" :key="row.id">
               <td>{{ formatDate(row.created_at) }}</td>
-              <td>{{ (row.college )?.college_name || '—' }}</td>
+              <td>{{ row.college?.college_name || '—' }}</td>
               <td>{{ row.file_name || '—' }}</td>
               <td>{{ row.total_rows }}</td>
               <td class="text-success fw-medium">{{ row.success_count }}</td>

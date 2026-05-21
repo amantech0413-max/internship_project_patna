@@ -48,6 +48,12 @@ const submit = async () => {
       return
     }
     auth.setSession({ token: res.data.token, user: res.data.user })
+    try {
+      const me = await apiFetch('/auth/me')
+      auth.setSession({ token: res.data.token, user: me.data })
+    } catch {
+      /* use login payload */
+    }
     if (!auth.isAdmin && auth.can('staff_entry') && !auth.can('student_view')) {
       router.push('/entry')
     } else {

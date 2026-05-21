@@ -1,0 +1,1 @@
+import{f as c,t as s,p as _}from"./main-BoOqMjqv.js";const a=(t,e)=>{const o=t.__vccOpts||t;for(const[r,n]of e)o[r]=n;return o},f={};function p(t,e){const o=s("router-view");return _(),c(o)}const l=a(f,[["render",p]]);export{l as default};

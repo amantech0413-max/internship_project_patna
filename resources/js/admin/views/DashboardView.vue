@@ -1,5 +1,7 @@
 <template>
   <div>
+    <p v-if="loadError" class="alert alert-danger">{{ loadError }}</p>
+    <div v-if="pending" class="text-muted small mb-3">Loading dashboard...</div>
     <h2 class="h6 text-muted text-uppercase mb-2">College & Staff Entry</h2>
     <div class="row g-3 mb-4">
       <div v-for="c in collegeCards" :key="c.label" class="col-6 col-md-3">
@@ -26,12 +28,12 @@
       <div class="card-body">
         <h3 class="h6 fw-semibold">Quick Actions</h3>
         <div class="d-flex flex-wrap gap-2 mt-2">
-          <router-link to="/entry" class="btn btn-primary btn-sm">Staff Entry</router-link>
-          <router-link to="/colleges" class="btn btn-outline-primary btn-sm">Colleges</router-link>
-          <router-link to="/students" class="btn btn-outline-primary btn-sm">All Students</router-link>
-          <router-link to="/students/create" class="btn btn-outline-secondary btn-sm">Add Full Student</router-link>
-          <router-link to="/groups" class="btn btn-outline-secondary btn-sm">Groups</router-link>
-          <router-link to="/whatsapp" class="btn btn-outline-success btn-sm">WhatsApp</router-link>
+          <router-link v-if="auth.can('staff_entry')" to="/entry" class="btn btn-primary btn-sm">Staff Entry</router-link>
+          <router-link v-if="auth.can('college_manage')" to="/colleges" class="btn btn-outline-primary btn-sm">Colleges</router-link>
+          <router-link v-if="auth.can('student_view')" to="/students" class="btn btn-outline-primary btn-sm">All Students</router-link>
+          <router-link v-if="auth.can('student_create')" to="/students/create" class="btn btn-outline-secondary btn-sm">Add Full Student</router-link>
+          <router-link v-if="auth.isAdmin" to="/groups" class="btn btn-outline-secondary btn-sm">Groups</router-link>
+          <router-link v-if="auth.isAdmin" to="/whatsapp" class="btn btn-outline-success btn-sm">WhatsApp</router-link>
         </div>
       </div>
     </div>
@@ -40,13 +42,18 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { apiFetch } from '@/api/client'
-import { useFetchData } from '@/utils/apiHelpers'
+import { parseApiError, useFetchData } from '@/utils/apiHelpers'
 
-const { data } = useFetchData(async () => {
+const auth = useAuthStore()
+
+const { data, pending, error } = useFetchData(async () => {
   const res = await apiFetch('/admin/dashboard')
   return res.data
 })
+
+const loadError = computed(() => (error.value ? parseApiError(error.value) : ''))
 
 const collegeCards = computed(() => [
   { label: 'Colleges', value: data.value?.total_colleges ?? 0 },

@@ -2,7 +2,11 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
-const apiBase = window.__BLI__?.apiBase || '/api/v1'
+export function getApiBase() {
+  return window.__BLI__?.apiBase || '/api/v1'
+}
+
+const apiBase = getApiBase()
 
 export const http = axios.create({
   baseURL: apiBase,

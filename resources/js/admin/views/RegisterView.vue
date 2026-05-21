@@ -3,6 +3,7 @@
     <div class="w-100" style="max-width: 720px">
       <div class="text-center mb-4">
         <h1 class="h4 fw-bold text-primary">{{ PROGRAM_TITLE }}</h1>
+        <p v-if="college" class="fw-semibold text-dark mb-0 mt-2">{{ college.shortName }}</p>
       </div>
 
       <div v-if="success" class="card shadow border-success">

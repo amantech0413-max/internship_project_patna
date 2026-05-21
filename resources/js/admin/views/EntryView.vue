@@ -206,9 +206,8 @@ import { apiFetch, apiForm, apiDownload, getPublicApi } from '@/api/client'
 import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
 import { useToastStore } from '@/stores/toast'
 import { Modal } from 'bootstrap'
+
 const auth = useAuthStore()
-const config = useRuntimeConfig()
-const { token, user } = useAuthStore()
 const toast = useToastStore()
 
 const step = ref(1)
@@ -360,20 +359,10 @@ const confirmImport = async () => {
 
 const downloadSample = async () => {
   try {
-    const res = await fetch(`${config.public.apiBase}/staff/student/import/sample`, {
-      headers: { Authorization: `Bearer ${auth.token}`, Accept: 'application/json' },
-    })
-    if (!res.ok) throw new Error('Download failed')
-    const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'student_import_sample.xlsx'
-    a.click()
-    URL.revokeObjectURL(url)
-    useToastStore().show('Sample file downloaded.', 'info')
+    await apiDownload('/staff/student/import/sample', 'student_import_sample.xlsx')
+    toast.show('Sample file downloaded.', 'info')
   } catch {
-    useToastStore().show('Could not download sample file.', 'danger')
+    toast.show('Could not download sample file.', 'danger')
   }
 }
 </script>
