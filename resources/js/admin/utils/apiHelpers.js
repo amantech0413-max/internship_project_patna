@@ -32,6 +32,8 @@ export function unwrapList(res) {
     items = []
   }
 
+  items = items.filter((row) => row && typeof row === 'object' && row.id != null)
+
   return { items, meta }
 }
 

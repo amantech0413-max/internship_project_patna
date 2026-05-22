@@ -36,7 +36,7 @@
           @change="set('college_id', $event.target.value)"
         >
           <option value="">— Select college —</option>
-          <option v-for="c in colleges" :key="c.id" :value="String(c.id)">{{ c.college_name }}</option>
+          <option v-for="c in collegeOptions" :key="c.id" :value="String(c.id)">{{ c.college_name }}</option>
         </select>
       </div>
       <div class="col-md-6">
@@ -110,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { apiFetch } from '@/api/client'
 import { unwrapList } from '@/utils/apiHelpers'
 import FormField from './FormField.vue'
@@ -126,10 +126,14 @@ const props = defineProps({
 
 const colleges = ref([])
 
+const collegeOptions = computed(() =>
+  colleges.value.filter((c) => c && c.id != null)
+)
+
 onMounted(async () => {
   try {
     const res = await apiFetch('/admin/colleges/dropdown')
-    colleges.value = unwrapList(res)
+    colleges.value = unwrapList(res).items
   } catch {
     colleges.value = []
   }
