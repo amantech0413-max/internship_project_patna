@@ -13,7 +13,7 @@ class StudentRepository implements StudentRepositoryInterface
     use AppliesListSorting;
     public function findById(int $id): ?Student
     {
-        return Student::with(['creator.roleModel', 'college', 'groups'])->find($id);
+        return Student::with(['creator.roleModel', 'college'])->find($id);
     }
 
     public function findByRegistrationNo(string $registrationNo): ?Student

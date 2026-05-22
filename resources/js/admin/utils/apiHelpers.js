@@ -49,14 +49,21 @@ export function useFetchData(fetcher) {
   const data = ref(null)
   const pending = ref(true)
   const error = ref(null)
+  let loadedOnce = false
 
   const refresh = async () => {
-    pending.value = true
+    if (!loadedOnce) {
+      pending.value = true
+    }
     error.value = null
     try {
       data.value = await fetcher()
+      loadedOnce = true
     } catch (e) {
       error.value = e
+      if (!loadedOnce) {
+        data.value = null
+      }
     } finally {
       pending.value = false
     }

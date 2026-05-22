@@ -1,4 +1,5 @@
 export const emptyStudentForm = () => ({
+  registration_no: '',
   name: '',
   father_name: '',
   university_roll_no: '',

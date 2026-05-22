@@ -1,5 +1,5 @@
 <template>
-  <div :class="class">
+  <div :class="wrapperClass">
     <label v-if="label" class="form-label">{{ label }}</label>
     <input
       :value="modelValue"
@@ -25,7 +25,7 @@ defineProps({
   maxlength: [String, Number],
   inputmode: String,
   invalid: Boolean,
-  class: String,
+  wrapperClass: String,
 })
 defineEmits(['update:modelValue'])
 </script>

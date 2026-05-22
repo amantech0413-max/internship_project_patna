@@ -7,7 +7,7 @@
 
     <div v-else-if="pending" class="text-muted py-5 text-center">Loading student...</div>
 
-    <template v-else-if="student">
+    <template v-else-if="!loadError && student">
       <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
         <div>
           <p class="text-muted small mb-1">Edit student</p>
@@ -57,6 +57,7 @@
             View only — you do not have permission to edit students.
           </p>
           <StudentForm
+            :key="studentId"
             :form="form"
             show-status
             show-rejection
@@ -86,6 +87,11 @@
         </div>
       </div>
     </template>
+
+    <div v-else class="alert alert-warning">
+      Student record could not be loaded.
+      <router-link to="/students" class="alert-link ms-2">← Back to Students</router-link>
+    </div>
   </div>
 </template>
 
@@ -118,14 +124,26 @@ const loadError = ref('')
 
 const studentId = computed(() => route.params.id)
 
-const { data: student, pending, refresh, error: fetchErr } = useFetchData(async () => {
+const loadStudent = async () => {
   const res = await apiFetch(`/admin/students/${studentId.value}`)
-  Object.assign(form, studentToForm(res.data))
-  return res.data
-})
+  const row = res?.data ?? res
+  if (!row?.id) {
+    throw new Error('Student data not found in response.')
+  }
+  Object.assign(form, studentToForm(row))
+  return row
+}
+
+const { data: student, pending, refresh, error: fetchErr } = useFetchData(loadStudent)
 
 watch(fetchErr, (e) => {
   loadError.value = e ? parseApiError(e) : ''
+})
+
+watch(studentId, () => {
+  if (studentId.value) {
+    refresh()
+  }
 })
 
 const displayStatus = computed(() => {

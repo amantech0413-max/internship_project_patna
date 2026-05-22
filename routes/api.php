@@ -71,7 +71,7 @@ Route::prefix('v1')->group(function () {
 
             // College dropdown for entry + college modules
             Route::get('colleges/dropdown', [CollegeController::class, 'dropdown'])
-                ->middleware('permission:staff_entry,college_manage');
+                ->middleware('permission:staff_entry,college_manage,student_view,student_edit');
 
             Route::middleware('permission:college_manage')->group(function () {
                 Route::apiResource('colleges', CollegeController::class)->except(['create', 'edit']);

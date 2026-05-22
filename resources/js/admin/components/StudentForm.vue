@@ -57,14 +57,23 @@
     <div class="row g-3 mb-4">
       <div class="col-md-6">
         <label class="form-label">Mode *</label>
-        <select v-model="form.internship_mode" required class="form-select">
+        <select
+          class="form-select"
+          required
+          :value="form.internship_mode"
+          @change="set('internship_mode', $event.target.value)"
+        >
           <option value="online">Online</option>
           <option value="offline">Offline</option>
         </select>
       </div>
       <div v-if="showStatus" class="col-md-6">
         <label class="form-label">Status</label>
-        <select v-model="form.status" class="form-select">
+        <select
+          class="form-select"
+          :value="form.status"
+          @change="set('status', $event.target.value)"
+        >
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
@@ -88,7 +97,12 @@
 
     <div v-if="showRejection && form.status === 'rejected'" class="mb-3">
       <label class="form-label">Rejection Reason</label>
-      <textarea v-model="form.rejection_reason" rows="2" class="form-control" />
+      <textarea
+        class="form-control"
+        rows="2"
+        :value="form.rejection_reason"
+        @input="set('rejection_reason', $event.target.value)"
+      />
     </div>
 
     <slot name="actions" />
