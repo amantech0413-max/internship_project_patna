@@ -1,6 +1,6 @@
 <template>
   <RegisterPageShell
-    :college-short-name="college?.shortName"
+    :college-short-name="college?.short_name"
     hero-title="Internship Jun 2026 Registration"
     hero-description="Begin your professional journey with us. Fill out the form carefully to apply for the internship program."
   >
@@ -56,7 +56,7 @@
               <label>College Name</label>
               <div class="reg-input-wrap">
                 <i class="bi bi-building reg-input-icon" />
-                <input :value="college?.shortName" class="reg-input" readonly tabindex="-1" />
+                <input :value="college?.short_name || college?.name" class="reg-input" readonly tabindex="-1" />
               </div>
             </div>
           </div>
@@ -146,7 +146,6 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPublicApi } from '@/api/client'
 import { parseApiError } from '@/utils/apiHelpers'
-import { collegeBySlug } from '@/config/registrationColleges'
 import RegisterPageShell from '@/components/RegisterPageShell.vue'
 
 const route = useRoute()
@@ -154,17 +153,27 @@ const router = useRouter()
 const http = getPublicApi()
 
 const slug = computed(() => String(route.params.slug || ''))
-const college = computed(() => collegeBySlug(slug.value))
+const college = ref(null)
 
-watch(
-  () => slug.value,
-  (s) => {
-    if (!collegeBySlug(s)) {
+const loadCollege = async (s) => {
+  if (!s) {
+    college.value = null
+    router.replace({ name: 'register' })
+    return
+  }
+  try {
+    const res = await http.get(`/registration/colleges/${encodeURIComponent(s)}`)
+    college.value = res.data?.data || null
+    if (!college.value) {
       router.replace({ name: 'register' })
     }
-  },
-  { immediate: true }
-)
+  } catch {
+    college.value = null
+    router.replace({ name: 'register' })
+  }
+}
+
+watch(() => slug.value, loadCollege, { immediate: true })
 
 const loading = ref(false)
 const error = ref('')

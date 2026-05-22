@@ -5,17 +5,23 @@ use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\ExcelImportLogController;
 use App\Http\Controllers\Api\V1\Admin\InternshipGroupController;
 use App\Http\Controllers\Api\V1\Admin\NotificationController as AdminNotificationController;
+use App\Http\Controllers\Api\V1\Admin\RoleController;
 use App\Http\Controllers\Api\V1\Admin\StaffStudentController;
 use App\Http\Controllers\Api\V1\Admin\StaffUserController;
 use App\Http\Controllers\Api\V1\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Api\V1\Admin\WhatsAppController;
 use App\Http\Controllers\Api\V1\Admin\WhatsappMessageController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\PublicRegistrationController;
+use App\Http\Controllers\Api\V1\Admin\BinController;
 use App\Http\Controllers\Api\V1\Staff\StaffStudentImportController;
 use App\Http\Controllers\Api\V1\StudentDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    Route::get('registration/colleges', [PublicRegistrationController::class, 'colleges']);
+    Route::get('registration/colleges/{slug}', [PublicRegistrationController::class, 'collegeBySlug']);
+
     Route::prefix('auth')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
         Route::post('register', [AuthController::class, 'register']);
@@ -25,6 +31,7 @@ Route::prefix('v1')->group(function () {
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me', [AuthController::class, 'me']);
+            Route::get('access', [AuthController::class, 'access']);
         });
     });
 
@@ -48,9 +55,17 @@ Route::prefix('v1')->group(function () {
         Route::prefix('admin')->middleware('role:super_admin,admin,college_coordinator')->group(function () {
             Route::get('dashboard', [DashboardController::class, 'index']);
 
-            // Staff user management (admin only — staff_manage permission)
+            // Roles & permissions (super_admin only)
+            Route::middleware('role:super_admin')->group(function () {
+                Route::get('roles/permissions', [RoleController::class, 'permissions']);
+                Route::get('roles/assignable', [RoleController::class, 'assignable']);
+                Route::apiResource('roles', RoleController::class)->except(['create', 'edit']);
+            });
+
+            // Staff user management (staff_manage permission)
             Route::middleware('permission:staff_manage')->group(function () {
                 Route::get('staff-users/permission-keys', [StaffUserController::class, 'permissionKeys']);
+                Route::get('staff-users/roles', [RoleController::class, 'assignable']);
                 Route::apiResource('staff-users', StaffUserController::class)->except(['create', 'edit']);
             });
 
@@ -93,6 +108,22 @@ Route::prefix('v1')->group(function () {
             Route::middleware('permission:student_approve')->group(function () {
                 Route::post('students/{id}/approve', [AdminStudentController::class, 'approve']);
                 Route::post('students/{id}/reject', [AdminStudentController::class, 'reject']);
+            });
+
+            Route::middleware('permission:student_delete')->group(function () {
+                Route::delete('students/{id}', [AdminStudentController::class, 'destroy']);
+            });
+
+            Route::middleware('permission:bin_manage,bin_delete_permanent')->group(function () {
+                Route::get('bin', [BinController::class, 'index']);
+            });
+
+            Route::middleware('permission:bin_manage')->group(function () {
+                Route::post('bin/restore', [BinController::class, 'restore']);
+            });
+
+            Route::middleware('permission:bin_delete_permanent')->group(function () {
+                Route::delete('bin/force', [BinController::class, 'forceDestroy']);
             });
 
             // Internship groups, WhatsApp, notifications (admin / full staff)

@@ -2,6 +2,10 @@
 
 namespace App\Support;
 
+use App\Models\Permission;
+use App\Models\Role;
+use App\Models\User;
+
 class StaffPermissions
 {
     public const STAFF_ENTRY = 'staff_entry';
@@ -20,6 +24,10 @@ class StaffPermissions
 
     public const STAFF_MANAGE = 'staff_manage';
 
+    public const BIN_MANAGE = 'bin_manage';
+
+    public const BIN_DELETE_PERMANENT = 'bin_delete_permanent';
+
     /** @return list<string> */
     public static function keys(): array
     {
@@ -32,6 +40,8 @@ class StaffPermissions
             self::STUDENT_APPROVE,
             self::COLLEGE_MANAGE,
             self::STAFF_MANAGE,
+            self::BIN_MANAGE,
+            self::BIN_DELETE_PERMANENT,
         ];
     }
 
@@ -70,5 +80,58 @@ class StaffPermissions
         }
 
         return $base;
+    }
+
+    /** @return array<string, string> */
+    public static function labels(): array
+    {
+        return [
+            self::STAFF_ENTRY => 'Staff Entry & Excel Import',
+            self::STUDENT_VIEW => 'View Students',
+            self::STUDENT_CREATE => 'Create Students',
+            self::STUDENT_EDIT => 'Edit Students',
+            self::STUDENT_DELETE => 'Delete Students',
+            self::STUDENT_APPROVE => 'Approve / Reject Students',
+            self::COLLEGE_MANAGE => 'Manage Colleges',
+            self::STAFF_MANAGE => 'Manage Staff Users',
+            self::BIN_MANAGE => 'Recycle Bin — Restore Items',
+            self::BIN_DELETE_PERMANENT => 'Recycle Bin — Delete Permanently',
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public static function accessPayload(?User $user = null): array
+    {
+        $dbPermissions = Permission::query()->orderBy('key')->get();
+        $labels = self::labels();
+        $permissionList = $dbPermissions->isNotEmpty()
+            ? $dbPermissions->map(fn ($p) => [
+                'id' => $p->id,
+                'key' => $p->key,
+                'label' => $p->label,
+            ])->values()->all()
+            : collect(self::keys())->map(fn ($k) => ['key' => $k, 'label' => $labels[$k] ?? $k])->values()->all();
+
+        $assignableRoles = Role::query()->assignable()->with('permissions')->orderBy('name')->get();
+
+        return [
+            'permissions' => [
+                'keys' => self::keys(),
+                'labels' => $labels,
+                'defaults' => self::defaultsForStaff(),
+                'list' => $permissionList,
+            ],
+            'roles' => $assignableRoles->map(fn ($r) => [
+                'id' => $r->id,
+                'name' => $r->name,
+                'slug' => $r->slug,
+                'permission_keys' => $r->permissions->pluck('key')->values(),
+            ])->values()->all(),
+            'menu' => config('admin_access.menu', []),
+            'route_permissions' => config('admin_access.route_permissions', []),
+            'admin_only_routes' => config('admin_access.admin_only_routes', []),
+            'super_admin_only_routes' => config('admin_access.super_admin_only_routes', []),
+            'can_manage_roles' => $user?->isSuperAdmin() ?? false,
+        ];
     }
 }

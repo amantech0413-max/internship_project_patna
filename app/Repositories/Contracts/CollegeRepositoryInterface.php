@@ -12,6 +12,10 @@ interface CollegeRepositoryInterface
 
     public function allActive(): Collection;
 
+    public function allActiveForRegistration(): Collection;
+
+    public function findBySlug(string $slug): ?College;
+
     public function findById(int $id): ?College;
 
     public function create(array $data): College;

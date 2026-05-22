@@ -19,12 +19,12 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { apiFetch, apiForm, apiDownload, getPublicApi } from '@/api/client'
 import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
-import { useToastStore } from '@/stores/toast'
-const auth = useAuthStore()
+import { alertSuccess } from '@/utils/swal'
+
 const form = reactive({ title: '', message: '', role: 'student' })
 
 const broadcast = async () => {
   await apiFetch('/admin/notifications/broadcast', { method: 'POST', body: form })
-  alert('Broadcast queued')
+  alertSuccess('Broadcast queued')
 }
 </script>

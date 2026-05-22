@@ -16,8 +16,8 @@ class CollegeController extends Controller
     public function index(Request $request): JsonResponse
     {
         $paginator = $this->colleges->list(
-            $request->only(['search', 'status']),
-            (int) $request->get('per_page', 15)
+            $request->only(['search', 'status', 'sort_by', 'sort_dir']),
+            (int) $request->get('per_page', 10)
         );
 
         return $this->success(CollegeResource::collection($paginator));

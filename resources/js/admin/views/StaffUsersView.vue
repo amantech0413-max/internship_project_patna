@@ -2,23 +2,52 @@
   <div>
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
       <p class="text-muted small mb-0">
-        Create staff logins (email + password) and assign permissions for entry, students, colleges, etc.
+        Create staff logins and assign a role — access comes from that role&apos;s permissions.
       </p>
       <button type="button" class="btn btn-primary btn-sm" @click="openForm()">
         <i class="bi bi-plus-lg me-1" /> Add Staff User
       </button>
     </div>
 
+    <div class="card table-card mb-3">
+      <div class="card-body row g-2 align-items-end">
+        <div class="col-md-8">
+          <label class="form-label small text-muted mb-1">Search</label>
+          <input
+            v-model="filters.search"
+            class="form-control"
+            placeholder="Name, email, phone..."
+            @keyup.enter="applyFilters"
+          />
+        </div>
+        <div class="col-md-4">
+          <button type="button" class="btn btn-dark w-100" @click="applyFilters">
+            <i class="bi bi-funnel me-1" />Filter
+          </button>
+        </div>
+      </div>
+    </div>
+
     <p v-if="loadError" class="alert alert-danger">{{ loadError }}</p>
 
-    <DataTable :columns="columns" :rows="rows">
-      <template #actions="{ row }">
-        <button type="button" class="btn btn-sm btn-outline-primary me-1" @click="openForm(row)">Edit</button>
-        <button type="button" class="btn btn-sm btn-outline-danger" @click="remove(row.id)">Delete</button>
-      </template>
-    </DataTable>
-
-    <PaginationBar v-if="meta" :meta="meta" @page="goToPage" />
+    <div class="card table-card">
+      <div class="card-body table-responsive">
+        <table ref="tableRef" class="table table-striped table-hover w-100">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Register Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody />
+        </table>
+      </div>
+    </div>
 
     <div v-if="showModal" class="modal show d-block" tabindex="-1" style="background: rgba(0,0,0,.5)">
       <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -46,27 +75,22 @@
                   <label class="form-label">{{ editingId ? 'New Password (optional)' : 'Password *' }}</label>
                   <input v-model="form.password" type="password" class="form-control" :required="!editingId" minlength="6" />
                 </div>
-                <div class="col-12">
-                  <div class="form-check">
+                <div class="col-md-6">
+                  <label class="form-label">Role *</label>
+                  <select v-model="form.role_id" class="form-select" required>
+                    <option value="">Select role...</option>
+                    <option v-for="r in staffRoles" :key="r.id" :value="Number(r.id)">{{ r.name }}</option>
+                  </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                  <div class="form-check mb-2">
                     <input id="active" v-model="form.is_active" class="form-check-input" type="checkbox" />
                     <label class="form-check-label" for="active">Active account</label>
                   </div>
                 </div>
-              </div>
-
-              <hr class="my-4" />
-              <h6 class="fw-semibold mb-3">Permissions</h6>
-              <div class="row g-2">
-                <div v-for="key in permissionKeys" :key="key" class="col-md-6">
-                  <div class="form-check">
-                    <input
-                      :id="`perm-${key}`"
-                      v-model="form.permissions[key]"
-                      class="form-check-input"
-                      type="checkbox"
-                    />
-                    <label class="form-check-label" :for="`perm-${key}`">{{ permissionLabels[key] || key }}</label>
-                  </div>
+                <div v-if="selectedRoleKeys.length" class="col-12">
+                  <p class="small text-muted mb-1">This role includes:</p>
+                  <span v-for="k in selectedRoleKeys" :key="k" class="badge text-bg-light border me-1 mb-1">{{ k }}</span>
                 </div>
               </div>
               <p v-if="formError" class="text-danger small mt-3 mb-0">{{ formError }}</p>
@@ -85,32 +109,36 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { apiFetch, apiForm, apiDownload, getPublicApi } from '@/api/client'
-import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
+import { apiFetch } from '@/api/client'
+import { parseApiError } from '@/utils/apiHelpers'
 import { useToastStore } from '@/stores/toast'
-import { Modal } from 'bootstrap'
+import {
+  initServerDataTable,
+  reloadDataTable,
+  destroyDataTable,
+  formatDateTime,
+  statusBadge,
+} from '@/utils/serverDataTable'
+import { alertError, confirmDelete, toastSuccess } from '@/utils/swal'
+
+const route = useRoute()
+const router = useRouter()
 const auth = useAuthStore()
 const toast = useToastStore()
+const tableRef = ref(null)
+let dt = null
 
-const columns = [
-  { key: 'name', label: 'Name' },
-  { key: 'email', label: 'Email' },
-  { key: 'phone', label: 'Phone' },
-  { key: 'active', label: 'Status' },
-]
-
-const currentPage = ref(1)
-const permissionKeys = ref([])
-const permissionLabels = ref({})
-const permissionDefaults = ref({})
+const filters = reactive({ search: '' })
+const staffRoles = computed(() => auth.staffRoles)
 
 const showModal = ref(false)
 const editingId = ref(null)
 const saving = ref(false)
 const formError = ref('')
+const loadError = ref('')
 
 const form = reactive({
   name: '',
@@ -118,57 +146,134 @@ const form = reactive({
   phone: '',
   password: '',
   is_active: true,
-  permissions: {} ,
+  role_id: '',
 })
 
-const fetchList = async () => {
-  const res = await apiFetch(
-    `/admin/staff-users?page=${currentPage.value}&per_page=15`
-  )
-  return unwrapList(res)
+const selectedRoleKeys = computed(() => {
+  const role = staffRoles.value.find((r) => String(r.id) === String(form.role_id))
+  return role?.permission_keys || []
+})
+
+const getFilterParams = () => {
+  const params = {}
+  if (filters.search?.trim()) params.search = filters.search.trim()
+  return params
 }
 
-const { data, pending, error, refresh } = useFetchData(fetchList)
+const initTable = () => {
+  if (!tableRef.value) return
+  dt = initServerDataTable(tableRef.value, {
+    url: '/admin/staff-users',
+    pageLength: 10,
+    defaultOrder: [[5, 'desc']],
+    defaultSortBy: 'created_at',
+    columnSortKeys: ['name', 'email', 'phone', null, 'is_active', 'created_at', null],
+    getFilterParams,
+    onError: (err) => {
+      loadError.value = parseApiError(err) || 'Failed to load staff users.'
+    },
+    columns: [
+      { data: 'name' },
+      { data: 'email' },
+      { data: 'phone', defaultContent: '—' },
+      {
+        data: 'role_label',
+        orderable: false,
+        defaultContent: '—',
+      },
+      {
+        data: 'is_active',
+        render: (d) => statusBadge(d ? 'active' : 'inactive'),
+      },
+      { data: 'created_at', render: (d) => formatDateTime(d) },
+      {
+        data: null,
+        orderable: false,
+        searchable: false,
+        render: (_d, _t, row) =>
+          `<button type="button" class="btn btn-sm btn-outline-primary me-1" data-dt-action="edit" data-id="${row.id}">Edit</button>` +
+          `<button type="button" class="btn btn-sm btn-outline-danger" data-dt-action="delete" data-id="${row.id}">Delete</button>`,
+      },
+    ],
+  })
+}
 
-const loadError = computed(() => (error.value ? parseApiError(error.value) : ''))
-const meta = computed(() => data.value?.meta ?? null)
-const rows = computed(() =>
-  (data.value?.items ?? []).map((u) => ({
-    id: u.id,
-    name: u.name,
-    email: u.email,
-    phone: u.phone || '—',
-    active: u.is_active ? 'Active' : 'Inactive',
-  }))
+const onTableClick = async (e) => {
+  const btn = e.target.closest('[data-dt-action]')
+  if (!btn) return
+  const id = Number(btn.dataset.id)
+  if (btn.dataset.dtAction === 'edit') {
+    try {
+      const res = await apiFetch(`/admin/staff-users/${id}`)
+      openForm(res.data)
+    } catch (err) {
+      await alertError(parseApiError(err))
+    }
+    return
+  }
+  if (btn.dataset.dtAction === 'delete') {
+    await remove(id)
+  }
+}
+
+const applyFilters = () => reloadDataTable(dt)
+
+watch(
+  () => route.query.edit,
+  (editId) => {
+    if (route.name === 'staff-users' && editId) {
+      openStaffById(editId)
+    }
+  }
 )
 
-const loadPermissionMeta = async () => {
-  try {
-    const res = await apiFetch('/admin/staff-users/permission-keys')
-    permissionKeys.value = res.data.keys
-    permissionLabels.value = res.data.labels
-    permissionDefaults.value = res.data.defaults
-  } catch (e) {
-    console.error(e)
+onMounted(async () => {
+  if (!auth.staffRoles.length) {
+    await auth.loadAccess()
   }
-}
-
-onMounted(() => {
-  loadPermissionMeta()
+  await nextTick()
+  initTable()
+  tableRef.value?.addEventListener('click', onTableClick)
+  if (route.query.edit) {
+    await openStaffById(route.query.edit)
+  }
 })
 
-const resetPermissions = () => {
-  const base = {}
-  for (const key of permissionKeys.value) {
-    base[key] = permissionDefaults.value[key] ?? false
+onBeforeUnmount(() => {
+  tableRef.value?.removeEventListener('click', onTableClick)
+  destroyDataTable(dt)
+})
+
+const openStaffById = async (id) => {
+  const staffId = Number(id)
+  if (!staffId) return
+  formError.value = ''
+  if (!auth.staffRoles.length) {
+    await auth.loadAccess()
   }
-  form.permissions = base
+  editingId.value = staffId
+  try {
+    const res = await apiFetch(`/admin/staff-users/${staffId}`)
+    const u = res.data
+    form.name = String(u.name ?? '')
+    form.email = String(u.email ?? '')
+    form.phone = String(u.phone ?? '')
+    form.password = ''
+    form.is_active = !!u.is_active
+    form.role_id = Number(u.role_id || u.role_detail?.id || 0) || ''
+    showModal.value = true
+  } catch (e) {
+    await alertError(parseApiError(e))
+    if (route.query.edit) {
+      router.replace({ name: 'staff-users', query: {} })
+    }
+  }
 }
 
 const openForm = async (row) => {
   formError.value = ''
-  if (!permissionKeys.value.length) {
-    await loadPermissionMeta()
+  if (!auth.staffRoles.length) {
+    await auth.loadAccess()
   }
   if (row?.id) {
     editingId.value = row.id
@@ -180,7 +285,7 @@ const openForm = async (row) => {
       form.phone = String(u.phone ?? '')
       form.password = ''
       form.is_active = !!u.is_active
-      form.permissions = { ...(u.permissions ) }
+      form.role_id = Number(u.role_id || u.role_detail?.id || 0) || ''
     } catch (e) {
       formError.value = parseApiError(e)
       return
@@ -192,7 +297,7 @@ const openForm = async (row) => {
     form.phone = ''
     form.password = ''
     form.is_active = true
-    resetPermissions()
+    form.role_id = Number(staffRoles.value[0]?.id || 0) || ''
   }
   showModal.value = true
 }
@@ -201,6 +306,9 @@ const closeForm = () => {
   showModal.value = false
   editingId.value = null
   formError.value = ''
+  if (route.query.edit) {
+    router.replace({ name: 'staff-users', query: {} })
+  }
 }
 
 const save = async () => {
@@ -211,19 +319,18 @@ const save = async () => {
     email: form.email,
     phone: form.phone || null,
     is_active: form.is_active,
-    permissions: form.permissions,
+    role_id: form.role_id,
     ...(form.password ? { password: form.password } : {}),
   }
   try {
     if (editingId.value) {
       await apiFetch(`/admin/staff-users/${editingId.value}`, { method: 'PUT', body })
-      useToastStore().show('Staff user updated.', 'success')
     } else {
       await apiFetch('/admin/staff-users', { method: 'POST', body })
-      useToastStore().show('Staff user created.', 'success')
     }
     closeForm()
-    await refresh()
+    toastSuccess(editingId.value ? 'Staff user updated.' : 'Staff user created.')
+    reloadDataTable(dt)
   } catch (e) {
     formError.value = parseApiError(e)
   } finally {
@@ -232,18 +339,14 @@ const save = async () => {
 }
 
 const remove = async (id) => {
-  if (!confirm('Delete this staff user?')) return
+  const ok = await confirmDelete('this staff user')
+  if (!ok) return
   try {
     await apiFetch(`/admin/staff-users/${id}`, { method: 'DELETE' })
-    useToastStore().show('Staff user deleted.', 'success')
-    await refresh()
+    toastSuccess('Staff user deleted.')
+    reloadDataTable(dt)
   } catch (e) {
-    alert(parseApiError(e))
+    await alertError(parseApiError(e))
   }
-}
-
-const goToPage = async (p) => {
-  currentPage.value = p
-  await refresh()
 }
 </script>

@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use App\Enums\UserRole;
+use App\Models\Role;
 use App\Support\StaffPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -19,8 +20,7 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
-        'role',
-        'permissions',
+        'role_id',
         'password',
         'is_active',
     ];
@@ -36,21 +36,41 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
-            'role' => UserRole::class,
-            'permissions' => 'array',
         ];
+    }
+
+    public function roleModel(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    public function roleSlug(): ?string
+    {
+        return $this->roleModel?->slug;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->roleSlug() === 'super_admin';
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array($this->roleSlug(), ['super_admin', 'admin'], true);
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->roleSlug() === 'student';
+    }
+
+    public function canAccessPanel(): bool
+    {
+        return $this->roleSlug() !== null && $this->roleSlug() !== 'student';
     }
 
     public function hasPermission(string $permission): bool
     {
-        if ($this->role === UserRole::SuperAdmin || $this->role === UserRole::Admin) {
-            return true;
-        }
-
-        if ($this->role !== UserRole::CollegeCoordinator) {
-            return false;
-        }
-
         $perms = $this->effectivePermissions();
 
         return (bool) ($perms[$permission] ?? false);
@@ -59,15 +79,24 @@ class User extends Authenticatable
     /** @return array<string, bool> */
     public function effectivePermissions(): array
     {
-        if ($this->role === UserRole::SuperAdmin || $this->role === UserRole::Admin) {
+        $this->loadMissing('roleModel.permissions');
+
+        $role = $this->roleModel;
+
+        if (! $role) {
+            return array_fill_keys(StaffPermissions::keys(), false);
+        }
+
+        if (in_array($role->slug, ['super_admin', 'admin'], true)) {
             return StaffPermissions::allGranted();
         }
 
-        if ($this->role === UserRole::CollegeCoordinator) {
-            return StaffPermissions::normalize($this->permissions);
+        $granted = array_fill_keys(StaffPermissions::keys(), false);
+        foreach ($role->permissions as $perm) {
+            $granted[$perm->key] = true;
         }
 
-        return [];
+        return $granted;
     }
 
     public function student(): HasOne
@@ -82,11 +111,6 @@ class User extends Authenticatable
 
     public function isStaff(): bool
     {
-        return $this->role?->isStaff() ?? false;
-    }
-
-    public function isStudent(): bool
-    {
-        return $this->role === UserRole::Student;
+        return $this->canAccessPanel();
     }
 }

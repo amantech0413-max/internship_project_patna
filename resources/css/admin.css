@@ -1,5 +1,7 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
+@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+@import 'sweetalert2/dist/sweetalert2.min.css';
 
 :root {
   --bli-primary: #0d47a1;
@@ -30,10 +32,8 @@ body.admin-menu-open {
   width: var(--sidebar-width);
   flex: 0 0 var(--sidebar-width);
   min-height: 100vh;
-  max-height: 100vh;
   background: linear-gradient(180deg, var(--bli-sidebar) 0%, #062a52 100%);
   z-index: 1040;
-  overflow: hidden;
 }
 
 .admin-main {
@@ -41,7 +41,6 @@ body.admin-menu-open {
   min-width: 0;
   max-width: 100%;
   padding: 0.75rem 1rem 2rem;
-  overflow-x: auto;
 }
 
 @media (min-width: 768px) {
@@ -58,9 +57,7 @@ body.admin-menu-open {
 }
 
 .sidebar {
-  height: 100%;
   min-height: 100vh;
-  max-height: 100vh;
   width: 100%;
 }
 
@@ -99,6 +96,53 @@ body.admin-menu-open {
   font-weight: 700;
   color: #1a237e;
   font-size: 1.1rem;
+}
+
+table.dataTable thead th {
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+table.dataTable tbody td {
+  vertical-align: middle;
+}
+
+.dataTables_wrapper {
+  width: 100%;
+}
+
+.dataTables_wrapper .dt-layout-row {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dataTables_wrapper .dt-length select {
+  width: auto;
+  display: inline-block;
+  min-width: 4.5rem;
+}
+
+.dataTables_wrapper .dt-info,
+.dataTables_wrapper .dt-paging {
+  font-size: 0.875rem;
+}
+
+.table-card .table-responsive,
+.table-card .dataTables_wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 575.98px) {
+  .dataTables_wrapper .dt-layout-cell {
+    width: 100%;
+    text-align: center !important;
+  }
+
+  .dataTables_wrapper .dt-paging .pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 
 .toast-container-fixed {

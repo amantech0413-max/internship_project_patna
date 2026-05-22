@@ -13,7 +13,10 @@
     "axios": "^1.8.4",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "datatables.net-bs5": "^2.3.8",
+    "jquery": "^4.0.0",
     "pinia": "^3.0.1",
+    "sweetalert2": "^11.26.24",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },

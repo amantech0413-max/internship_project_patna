@@ -81,6 +81,7 @@ import { apiFetch, apiForm, apiDownload, getPublicApi } from '@/api/client'
 import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
 import { useToastStore } from '@/stores/toast'
 import { buildStudentFormData, emptyStudentForm, studentToForm } from '@/utils/studentForm'
+import { alertError, promptText, toastSuccess } from '@/utils/swal'
 const auth = useAuthStore()
 const route = useRoute()
 const { can } = useAuthStore()
@@ -142,20 +143,22 @@ const save = async () => {
 const approve = async () => {
   try {
     await apiFetch(`/admin/students/${route.params.id}/approve`, { method: 'POST' })
+    toastSuccess('Student approved.')
     await refresh()
   } catch (e) {
-    alert(parseApiError(e))
+    await alertError(parseApiError(e))
   }
 }
 
 const reject = async () => {
-  const reason = prompt('Rejection reason?')
+  const reason = await promptText('Reject student', 'Rejection reason')
   if (!reason) return
   try {
     await apiFetch(`/admin/students/${route.params.id}/reject`, { method: 'POST', body: { reason } })
+    toastSuccess('Student rejected.')
     await refresh()
   } catch (e) {
-    alert(parseApiError(e))
+    await alertError(parseApiError(e))
   }
 }
 </script>

@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\UserRole;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,12 +16,23 @@ class EnsureUserHasRole
             return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
         }
 
-        $allowed = array_map(fn ($r) => UserRole::from($r), $roles);
+        $slug = $user->roleSlug();
 
-        if (! in_array($user->role, $allowed, true)) {
-            return response()->json(['success' => false, 'message' => 'Forbidden.'], 403);
+        foreach ($roles as $allowed) {
+            // Legacy route name: any assignable staff role
+            if ($allowed === 'college_coordinator') {
+                if ($user->roleModel?->is_assignable) {
+                    return $next($request);
+                }
+
+                continue;
+            }
+
+            if ($slug === $allowed) {
+                return $next($request);
+            }
         }
 
-        return $next($request);
+        return response()->json(['success' => false, 'message' => 'Forbidden.'], 403);
     }
 }

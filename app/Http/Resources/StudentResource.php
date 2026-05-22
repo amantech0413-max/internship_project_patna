@@ -36,10 +36,18 @@ class StudentResource extends JsonResource
             'approved_at' => $this->approved_at?->toIso8601String(),
             'created_by' => $this->created_by,
             'added_by' => $this->created_by,
-            'added_by_user' => $this->whenLoaded('creator', fn () => [
-                'id' => $this->creator->id,
-                'name' => $this->creator->name,
-            ]),
+            'added_by_user' => $this->whenLoaded('creator', function () {
+                if (! $this->creator) {
+                    return null;
+                }
+
+                return [
+                    'id' => $this->creator->id,
+                    'name' => $this->creator->name,
+                    'email' => $this->creator->email,
+                    'is_assignable_staff' => (bool) $this->creator->roleModel?->is_assignable,
+                ];
+            }),
             'college' => $this->whenLoaded('college', fn () => [
                 'id' => $this->college->id,
                 'college_name' => $this->college->college_name,

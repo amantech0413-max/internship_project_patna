@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\Auth\RegisterStudentRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use App\Services\StudentService;
+use App\Support\StaffPermissions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -74,5 +75,10 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         return $this->success(new UserResource($this->auth->loadUserRelations($request->user())));
+    }
+
+    public function access(Request $request): JsonResponse
+    {
+        return $this->success(StaffPermissions::accessPayload($request->user()));
     }
 }

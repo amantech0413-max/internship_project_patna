@@ -2,19 +2,6 @@ import { useAuthStore } from '@/stores/auth'
 
 const PUBLIC = ['login', 'register', 'register-college', 'home']
 
-const PERM_ROUTES = {
-  colleges: 'college_manage',
-  entry: 'staff_entry',
-  'student-entries': 'staff_entry',
-  'import-logs': 'staff_entry',
-  students: 'student_view',
-  'student-create': 'student_create',
-  'student-edit': 'student_edit',
-  'staff-users': 'staff_manage',
-}
-
-const ADMIN_ONLY = ['groups', 'group-create', 'group-edit', 'whatsapp', 'reports', 'certificates', 'notifications', 'settings']
-
 function staffHome(auth) {
   if (auth.isAdmin) return { name: 'dashboard' }
   if (auth.can('staff_entry') && !auth.can('student_view')) return { name: 'entry' }
@@ -36,12 +23,22 @@ export function setupGuards(router) {
       return { name: 'login', query: { redirect: to.fullPath } }
     }
 
-    const perm = PERM_ROUTES[to.name]
-    if (perm && !auth.can(perm)) {
+    if (to.name === 'bin') {
+      if (!auth.can('bin_manage') && !auth.can('bin_delete_permanent')) {
+        return staffHome(auth)
+      }
+    } else {
+      const perm = auth.routePermissions[to.name]
+      if (perm && !auth.can(perm)) {
+        return staffHome(auth)
+      }
+    }
+
+    if (auth.superAdminOnlyRoutes?.includes(to.name) && !auth.isSuperAdmin) {
       return staffHome(auth)
     }
 
-    if (ADMIN_ONLY.includes(to.name) && !auth.isAdmin) {
+    if (auth.adminOnlyRoutes.includes(to.name) && !auth.isAdmin) {
       return staffHome(auth)
     }
 

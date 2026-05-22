@@ -23,13 +23,13 @@ class NotificationController extends Controller
         $request->validate([
             'title' => ['required', 'string'],
             'message' => ['required', 'string'],
-            'role' => ['nullable', 'in:student,admin,super_admin,college_coordinator'],
+            'role' => ['nullable', 'string', 'exists:roles,slug'],
         ]);
 
         $query = User::query()->where('is_active', true);
 
         if ($request->role) {
-            $query->where('role', $request->role);
+            $query->whereHas('roleModel', fn ($q) => $q->where('slug', $request->role));
         }
 
         $users = $query->get();

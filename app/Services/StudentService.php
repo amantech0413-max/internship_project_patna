@@ -162,6 +162,11 @@ class StudentService
         ]);
     }
 
+    public function delete(Student $student): bool
+    {
+        return $this->students->delete($student);
+    }
+
     protected function isProfileComplete(array $data, ?UploadedFile $photo, ?UploadedFile $idProof): bool
     {
         $required = [

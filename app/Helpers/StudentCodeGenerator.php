@@ -8,12 +8,16 @@ class StudentCodeGenerator
 {
     public static function generateStudentCode(): string
     {
-        return self::nextCode('student_code', "BLI%sS", now()->format('Y'));
+        $year = now()->format('Y');
+
+        return self::nextCode('student_code', "BLI{$year}S", $year);
     }
 
     public static function generateRegistrationNo(): string
     {
-        return self::nextCode('registration_no', 'REG%s', now()->format('Y'));
+        $year = now()->format('Y');
+
+        return self::nextCode('registration_no', "REG{$year}", $year);
     }
 
     /** @deprecated Use generateStudentCode() */
@@ -22,9 +26,8 @@ class StudentCodeGenerator
         return self::generateStudentCode();
     }
 
-    protected static function nextCode(string $column, string $pattern, string $year): string
+    protected static function nextCode(string $column, string $prefix, string $year): string
     {
-        $prefix = sprintf($pattern, $year);
 
         $last = Student::query()
             ->where($column, 'like', "{$prefix}%")

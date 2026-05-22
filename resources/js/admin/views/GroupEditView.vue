@@ -83,6 +83,7 @@ import { apiFetch, apiForm, apiDownload, getPublicApi } from '@/api/client'
 import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
 import { useToastStore } from '@/stores/toast'
 import { useWhatsapp } from '@/composables/useWhatsapp'
+import { alertSuccess, confirmDelete } from '@/utils/swal'
 const auth = useAuthStore()
 const router = useRouter()
 
@@ -118,7 +119,7 @@ const assignStudents = async () => {
   selectedIds.value = []
   await loadGroup()
   await loadAvailable()
-  alert('Students assigned. Click Send WhatsApp Invitation to notify them.')
+  alertSuccess('Students assigned. Click Send WhatsApp Invitation to notify them.')
 }
 
 const unassign = async (id) => {
@@ -132,7 +133,7 @@ const unassign = async (id) => {
 const sendWhatsapp = async (resend = false) => {
   const ids = selectedIds.value.length ? selectedIds.value : assignedStudents.value.map((s) => s.id)
   await sendInvitations(Number(route.params.id), ids, resend)
-  alert(resend ? 'Re-send queued' : 'WhatsApp invitations queued')
+  alertSuccess(resend ? 'Re-send queued' : 'WhatsApp invitations queued')
   router.push(`/whatsapp?group=${route.params.id}`)
 }
 
@@ -156,7 +157,8 @@ const saveGroup = async () => {
 }
 
 const deleteGroup = async () => {
-  if (!confirm('Delete this group?')) return
+  const ok = await confirmDelete('this group')
+  if (!ok) return
   await apiFetch(`/admin/groups/${route.params.id}`, { method: 'DELETE' })
   router.push('/groups')
 }

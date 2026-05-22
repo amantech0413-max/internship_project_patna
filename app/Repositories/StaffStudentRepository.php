@@ -4,10 +4,12 @@ namespace App\Repositories;
 
 use App\Models\Student;
 use App\Repositories\Contracts\StaffStudentRepositoryInterface;
+use App\Support\AppliesListSorting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class StaffStudentRepository implements StaffStudentRepositoryInterface
 {
+    use AppliesListSorting;
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         $query = Student::query()
@@ -30,7 +32,14 @@ class StaffStudentRepository implements StaffStudentRepositoryInterface
             $query->where('mobile_number', $filters['mobile']);
         }
 
-        return $query->latest()->paginate($perPage);
+        $this->applyListSorting($query, $filters, [
+            'student_name',
+            'mobile_number',
+            'college_roll_no',
+            'created_at',
+        ]);
+
+        return $query->paginate($perPage);
     }
 
     public function create(array $data): Student

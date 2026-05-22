@@ -4,14 +4,16 @@ namespace App\Repositories;
 
 use App\Models\Student;
 use App\Repositories\Contracts\StudentRepositoryInterface;
+use App\Support\AppliesListSorting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 class StudentRepository implements StudentRepositoryInterface
 {
+    use AppliesListSorting;
     public function findById(int $id): ?Student
     {
-        return Student::with(['creator', 'college', 'groups'])->find($id);
+        return Student::with(['creator.roleModel', 'college', 'groups'])->find($id);
     }
 
     public function findByRegistrationNo(string $registrationNo): ?Student
@@ -26,7 +28,7 @@ class StudentRepository implements StudentRepositoryInterface
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Student::with(['creator', 'college', 'groups']);
+        $query = Student::with(['creator.roleModel', 'college', 'groups']);
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
@@ -58,7 +60,19 @@ class StudentRepository implements StudentRepositoryInterface
             $query->where('status', $filters['status']);
         }
 
-        return $query->latest()->paginate($perPage);
+        $this->applyListSorting($query, $filters, [
+            'student_code',
+            'student_name',
+            'mobile_number',
+            'college_name',
+            'internship_mode',
+            'status',
+            'registration_no',
+            'created_by',
+            'created_at',
+        ]);
+
+        return $query->paginate($perPage);
     }
 
     public function findByMobile(string $mobile): Collection
@@ -76,5 +90,10 @@ class StudentRepository implements StudentRepositoryInterface
         $student->update($data);
 
         return $student->fresh(['user', 'groups']);
+    }
+
+    public function delete(Student $student): bool
+    {
+        return (bool) $student->delete();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1\Auth;
 
+use App\Models\College;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,26 +15,34 @@ class RegisterStudentRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $colleges = config('internship_registration.colleges', []);
         $slug = $this->input('college_slug');
+        $college = $slug
+            ? College::query()->where('slug', $slug)->where('status', 'active')->first()
+            : null;
 
-        if ($slug && isset($colleges[$slug])) {
-            $this->merge(['college_name' => $colleges[$slug]]);
+        if ($college) {
+            $this->merge([
+                'college_name' => $college->college_name,
+                'college_id' => $college->id,
+            ]);
         }
     }
 
     public function rules(): array
     {
-        $collegeSlugs = array_keys(config('internship_registration.colleges', []));
-
         return [
-            'college_slug' => ['required', 'string', Rule::in($collegeSlugs)],
+            'college_slug' => [
+                'required',
+                'string',
+                Rule::exists('colleges', 'slug')->where('status', 'active')->whereNull('deleted_at'),
+            ],
             'registration_no' => ['required', 'string', 'max:50', 'unique:students,registration_no'],
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'father_name' => ['required', 'string', 'max:255'],
             'university_roll_no' => ['required', 'string', 'max:50'],
             'college_roll_no' => ['required', 'string', 'max:50'],
             'college_name' => ['required', 'string', 'max:255'],
+            'college_id' => ['nullable', 'integer', 'exists:colleges,id'],
             'subject' => ['required', 'string', 'max:100'],
             'mobile' => ['required', 'digits:10'],
             'email' => ['nullable', 'email', 'max:255'],
@@ -45,7 +54,7 @@ class RegisterStudentRequest extends FormRequest
     {
         return [
             'college_slug.required' => 'Please register through your college link.',
-            'college_slug.in' => 'Invalid college registration link.',
+            'college_slug.exists' => 'Invalid college registration link.',
             'registration_no.required' => 'Registration number is required.',
             'registration_no.unique' => 'This registration number is already registered.',
             'name.required' => 'Student name is required.',

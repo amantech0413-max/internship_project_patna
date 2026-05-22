@@ -27,8 +27,17 @@ class StoreStaffUserRequest extends FormRequest
             'phone' => ['nullable', 'regex:/^\d{10}$/'],
             'password' => [$userId ? 'nullable' : 'required', 'string', 'min:6'],
             'is_active' => ['boolean'],
-            'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['boolean'],
+            'role_id' => [
+                'required',
+                Rule::exists('roles', 'id')->where(fn ($q) => $q->where('is_assignable', true)),
+            ],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('assigned_role_id') && ! $this->has('role_id')) {
+            $this->merge(['role_id' => $this->input('assigned_role_id')]);
+        }
     }
 }

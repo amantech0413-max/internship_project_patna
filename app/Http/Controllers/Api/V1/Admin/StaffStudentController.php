@@ -16,8 +16,8 @@ class StaffStudentController extends Controller
     public function index(Request $request): JsonResponse
     {
         $paginator = $this->students->list(
-            $request->only(['search', 'college_id', 'mobile']),
-            (int) $request->get('per_page', 15)
+            $request->only(['search', 'college_id', 'mobile', 'sort_by', 'sort_dir']),
+            (int) $request->get('per_page', 10)
         );
 
         return $this->success(StaffStudentResource::collection($paginator));

@@ -43,7 +43,7 @@ const submit = async () => {
   error.value = ''
   try {
     const res = await apiFetch('/auth/login', { method: 'POST', body: form })
-    if (!['super_admin', 'admin', 'college_coordinator'].includes(res.data.user.role)) {
+    if (!res.data.user?.can_access_panel) {
       error.value = 'Staff access only.'
       return
     }
@@ -54,6 +54,7 @@ const submit = async () => {
     } catch {
       /* use login payload */
     }
+    await auth.loadAccess()
     if (!auth.isAdmin && auth.can('staff_entry') && !auth.can('student_view')) {
       router.push('/entry')
     } else {

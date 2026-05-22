@@ -10,7 +10,7 @@
     <div class="card table-card mb-3">
       <div class="card-body row g-2">
         <div class="col-md-6">
-          <input v-model="filters.search" class="form-control" placeholder="Search college..." @keyup.enter="load(1)" />
+          <input v-model="filters.search" class="form-control" placeholder="Search college..." @keyup.enter="applyFilters" />
         </div>
         <div class="col-md-3">
           <select v-model="filters.status" class="form-select">
@@ -20,7 +20,9 @@
           </select>
         </div>
         <div class="col-md-3">
-          <button class="btn btn-dark w-100" :disabled="loading" @click="load(1)">Filter</button>
+          <button class="btn btn-dark w-100" @click="applyFilters">
+            <i class="bi bi-funnel me-1" />Filter
+          </button>
         </div>
       </div>
     </div>
@@ -28,41 +30,25 @@
     <p v-if="error" class="alert alert-danger">{{ error }}</p>
 
     <div class="card table-card">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
+      <div class="card-body table-responsive">
+        <table ref="tableRef" class="table table-striped table-hover w-100">
           <thead class="table-light">
             <tr>
               <th>College Name</th>
+              <th>Slug</th>
               <th>Address</th>
               <th>Contact</th>
               <th>Mobile</th>
               <th>Status</th>
               <th>Students</th>
+              <th>Register Date</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-for="row in rows" :key="row.id">
-              <td class="fw-medium">{{ row.college_name }}</td>
-              <td>{{ row.address || '—' }}</td>
-              <td>{{ row.contact_person || '—' }}</td>
-              <td>{{ row.mobile_number || '—' }}</td>
-              <td><span class="badge" :class="row.status === 'active' ? 'text-bg-success' : 'text-bg-secondary'">{{ row.status }}</span></td>
-              <td>{{ row.students_count ?? 0 }}</td>
-              <td>
-                <button class="btn btn-sm btn-outline-primary me-1" @click="openForm(row)">Edit</button>
-                <button class="btn btn-sm btn-outline-danger" @click="remove(row.id)">Delete</button>
-              </td>
-            </tr>
-            <tr v-if="!rows.length && !loading">
-              <td colspan="7" class="text-center text-muted py-4">No colleges found</td>
-            </tr>
-          </tbody>
+          <tbody />
         </table>
       </div>
     </div>
-
-    <PaginationBar v-if="meta" :meta="meta" @page="load" />
 
     <div id="collegeModal" ref="modalEl" class="modal fade" tabindex="-1">
       <div class="modal-dialog">
@@ -77,6 +63,20 @@
                 <label class="form-label">College Name *</label>
                 <input v-model="form.college_name" class="form-control" required />
               </div>
+              <div class="col-12">
+                <label class="form-label">Registration Slug</label>
+                <input
+                  v-model="form.slug"
+                  class="form-control"
+                  placeholder="Auto from name if empty (e.g. my-college-name)"
+                  pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                />
+                <p class="form-text mb-0">Used in URL: /admin/register/<strong>slug</strong>. Must be unique.</p>
+              </div>
+              <p v-if="registrationUrl" class="col-12 small text-muted mb-0">
+                Registration link:
+                <a :href="registrationUrl" target="_blank" rel="noopener">{{ registrationUrl }}</a>
+              </p>
               <div class="col-12">
                 <label class="form-label">Address</label>
                 <textarea v-model="form.address" class="form-control" rows="2" />
@@ -110,21 +110,25 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { apiFetch, apiForm, apiDownload, getPublicApi } from '@/api/client'
-import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
-import { useToastStore } from '@/stores/toast'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { apiFetch } from '@/api/client'
+import { parseApiError } from '@/utils/apiHelpers'
 import { Modal } from 'bootstrap'
-const auth = useAuthStore()
+import {
+  initServerDataTable,
+  reloadDataTable,
+  destroyDataTable,
+  formatDateTime,
+  statusBadge,
+} from '@/utils/serverDataTable'
+import { alertError, confirmDelete, toastSuccess } from '@/utils/swal'
+
 const modalEl = ref(null)
+const tableRef = ref(null)
 let modal = null
+let dt = null
 
 const filters = reactive({ search: '', status: '' })
-const rows = ref([])
-const meta = ref(null)
-const loading = ref(false)
 const error = ref('')
 const editingId = ref(null)
 const saving = ref(false)
@@ -132,46 +136,120 @@ const formError = ref('')
 
 const form = reactive({
   college_name: '',
+  slug: '',
   address: '',
   contact_person: '',
   mobile_number: '',
   status: 'active',
 })
 
-onMounted(() => {
-  if (modalEl.value) modal = new Modal(modalEl.value)
-  load(1)
+const registrationUrl = computed(() => {
+  const s = String(form.slug || '').trim()
+  return s ? `${window.location.origin}/admin/register/${s}` : ''
 })
 
-const load = async (page = 1) => {
-  loading.value = true
-  error.value = ''
-  try {
-    const query = new URLSearchParams({ page: String(page), per_page: '15' })
-    Object.entries(filters).forEach(([k, v]) => v && query.set(k, v))
-    const res = await apiFetch(`/admin/colleges?${query}`)
-    const { items, meta: m } = unwrapList(res)
-    rows.value = items
-    meta.value = m ?? null
-  } catch (e) {
-    error.value = parseApiError(e)
-  } finally {
-    loading.value = false
+const getFilterParams = () => {
+  const params = {}
+  if (filters.search?.trim()) params.search = filters.search.trim()
+  if (filters.status) params.status = filters.status
+  return params
+}
+
+const initTable = () => {
+  if (!tableRef.value) return
+  dt = initServerDataTable(tableRef.value, {
+    url: '/admin/colleges',
+    pageLength: 10,
+    defaultOrder: [[7, 'desc']],
+    defaultSortBy: 'created_at',
+    columnSortKeys: [
+      'college_name',
+      'slug',
+      'address',
+      'contact_person',
+      'mobile_number',
+      'status',
+      'students_count',
+      'created_at',
+      null,
+    ],
+    getFilterParams,
+    onError: (err) => {
+      error.value = parseApiError(err) || 'Failed to load colleges.'
+    },
+    columns: [
+      { data: 'college_name' },
+      { data: 'slug', defaultContent: '—' },
+      { data: 'address', defaultContent: '—' },
+      { data: 'contact_person', defaultContent: '—' },
+      { data: 'mobile_number', defaultContent: '—' },
+      { data: 'status', render: (d) => statusBadge(d) },
+      { data: 'students_count', defaultContent: '0' },
+      { data: 'created_at', render: (d) => formatDateTime(d) },
+      {
+        data: null,
+        orderable: false,
+        searchable: false,
+        render: (_d, _t, row) =>
+          `<button type="button" class="btn btn-sm btn-outline-primary me-1" data-dt-action="edit" data-id="${row.id}">Edit</button>` +
+          `<button type="button" class="btn btn-sm btn-outline-danger" data-dt-action="delete" data-id="${row.id}">Delete</button>`,
+      },
+    ],
+  })
+}
+
+const onTableClick = async (e) => {
+  const btn = e.target.closest('[data-dt-action]')
+  if (!btn) return
+  const id = Number(btn.dataset.id)
+  if (btn.dataset.dtAction === 'edit') {
+    try {
+      const res = await apiFetch(`/admin/colleges/${id}`)
+      openForm(res.data)
+    } catch (err) {
+      await alertError(parseApiError(err))
+    }
+    return
+  }
+  if (btn.dataset.dtAction === 'delete') {
+    await remove(id)
   }
 }
+
+const applyFilters = () => reloadDataTable(dt)
+
+onMounted(async () => {
+  if (modalEl.value) modal = new Modal(modalEl.value)
+  await nextTick()
+  initTable()
+  tableRef.value?.addEventListener('click', onTableClick)
+})
+
+onBeforeUnmount(() => {
+  tableRef.value?.removeEventListener('click', onTableClick)
+  destroyDataTable(dt)
+})
 
 const openForm = (row) => {
   formError.value = ''
   if (row) {
     editingId.value = row.id
     form.college_name = String(row.college_name || '')
+    form.slug = String(row.slug || '')
     form.address = String(row.address || '')
     form.contact_person = String(row.contact_person || '')
     form.mobile_number = String(row.mobile_number || '')
     form.status = String(row.status || 'active')
   } else {
     editingId.value = null
-    Object.assign(form, { college_name: '', address: '', contact_person: '', mobile_number: '', status: 'active' })
+    Object.assign(form, {
+      college_name: '',
+      slug: '',
+      address: '',
+      contact_person: '',
+      mobile_number: '',
+      status: 'active',
+    })
   }
   modal?.show()
 }
@@ -186,21 +264,26 @@ const save = async () => {
       await apiFetch('/admin/colleges', { method: 'POST', body: { ...form } })
     }
     modal?.hide()
-    await load(meta.value?.current_page || 1)
+    toastSuccess(editingId.value ? 'College updated.' : 'College created.')
+    reloadDataTable(dt)
   } catch (e) {
-    formError.value = parseApiError(e)
+    const msg = parseApiError(e)
+    formError.value = msg
+    await alertError(msg)
   } finally {
     saving.value = false
   }
 }
 
 const remove = async (id) => {
-  if (!confirm('Delete this college?')) return
+  const ok = await confirmDelete('this college')
+  if (!ok) return
   try {
     await apiFetch(`/admin/colleges/${id}`, { method: 'DELETE' })
-    await load(meta.value?.current_page || 1)
+    toastSuccess('College moved to recycle bin.')
+    reloadDataTable(dt)
   } catch (e) {
-    alert(parseApiError(e))
+    await alertError(parseApiError(e))
   }
 }
 </script>

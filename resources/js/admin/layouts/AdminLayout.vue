@@ -31,7 +31,6 @@ const titles = {
   dashboard: 'Dashboard',
   colleges: 'Colleges',
   entry: 'Add Student',
-  'student-entries': 'Entry Records',
   'import-logs': 'Import Logs',
   students: 'Internship Students',
   'student-create': 'Add Student',
@@ -44,7 +43,9 @@ const titles = {
   certificates: 'Certificates',
   notifications: 'Notifications',
   settings: 'Settings',
+  roles: 'Roles & Permissions',
   'staff-users': 'Staff Users',
+  bin: 'Recycle Bin',
 }
 
 const title = computed(() => titles[route.name] || 'Admin Panel')

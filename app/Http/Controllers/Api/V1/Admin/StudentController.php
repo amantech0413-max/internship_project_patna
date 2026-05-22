@@ -26,7 +26,8 @@ class StudentController extends Controller
     {
         $paginator = $this->students->paginate($request->only([
             'search', 'mobile', 'college_name', 'semester', 'internship_mode', 'status',
-        ]), (int) $request->get('per_page', 15));
+            'sort_by', 'sort_dir',
+        ]), (int) $request->get('per_page', 10));
 
         return $this->success(StudentResource::collection($paginator));
     }
@@ -93,6 +94,17 @@ class StudentController extends Controller
         $updated = $this->studentService->reject($student, $request->user()->id, $request->reason);
 
         return $this->success(new StudentResource($updated), 'Student rejected.');
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $student = Student::findOrFail($id);
+
+        if (! $this->studentService->delete($student)) {
+            return $this->error('Could not delete student.', 500);
+        }
+
+        return $this->success(null, 'Student moved to recycle bin.');
     }
 
     public function exportCsv(Request $request): StreamedResponse

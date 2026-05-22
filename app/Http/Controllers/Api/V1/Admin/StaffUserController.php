@@ -17,25 +17,15 @@ class StaffUserController extends Controller
 
     public function permissionKeys(): JsonResponse
     {
-        return $this->success([
-            'keys' => StaffPermissions::keys(),
-            'labels' => [
-                StaffPermissions::STAFF_ENTRY => 'Staff Entry & Excel Import',
-                StaffPermissions::STUDENT_VIEW => 'View Students',
-                StaffPermissions::STUDENT_CREATE => 'Create Students',
-                StaffPermissions::STUDENT_EDIT => 'Edit Students',
-                StaffPermissions::STUDENT_DELETE => 'Delete Students',
-                StaffPermissions::STUDENT_APPROVE => 'Approve / Reject Students',
-                StaffPermissions::COLLEGE_MANAGE => 'Manage Colleges',
-                StaffPermissions::STAFF_MANAGE => 'Manage Staff Users',
-            ],
-            'defaults' => StaffPermissions::defaultsForStaff(),
-        ]);
+        return $this->success(StaffPermissions::accessPayload()['permissions']);
     }
 
     public function index(Request $request): JsonResponse
     {
-        $paginator = $this->staffUsers->list((int) $request->get('per_page', 15));
+        $paginator = $this->staffUsers->list(
+            $request->only(['search', 'sort_by', 'sort_dir']),
+            (int) $request->get('per_page', 10)
+        );
 
         return $this->success(UserResource::collection($paginator));
     }

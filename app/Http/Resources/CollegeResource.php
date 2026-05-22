@@ -12,6 +12,8 @@ class CollegeResource extends JsonResource
         return [
             'id' => $this->id,
             'college_name' => $this->college_name,
+            'slug' => $this->slug,
+            'registration_url' => $this->slug ? url('/admin/register/'.$this->slug) : null,
             'address' => $this->address,
             'contact_person' => $this->contact_person,
             'mobile_number' => $this->mobile_number,

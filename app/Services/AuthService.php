@@ -2,15 +2,13 @@
 
 namespace App\Services;
 
-use App\Enums\StudentStatus;
-use App\Enums\UserRole;
 use App\Models\OtpVerification;
+use App\Models\Role;
 use App\Models\Student;
 use App\Models\User;
 use App\Notifications\OtpNotification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthService
@@ -25,9 +23,9 @@ class AuthService
             ]);
         }
 
-        if ($user->isStudent()) {
+        if (! $user->canAccessPanel()) {
             throw ValidationException::withMessages([
-                'login' => ['Student login is disabled. Students are registered as records only — contact admin if you need help.'],
+                'login' => ['Staff access only. This account cannot use the admin panel.'],
             ]);
         }
 
@@ -50,10 +48,10 @@ class AuthService
     public function loadUserRelations(User $user): User
     {
         if ($user->isStudent()) {
-            return $user->load('student.groups');
+            return $user->load(['student.groups', 'roleModel.permissions']);
         }
 
-        return $user->load('student');
+        return $user->load(['roleModel.permissions']);
     }
 
     public function resolveUserByLogin(string $login): ?User
@@ -61,7 +59,11 @@ class AuthService
         $login = trim($login);
 
         if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
-            return User::where('email', $login)->first();
+            return User::query()
+                ->with('roleModel')
+                ->where('email', $login)
+                ->whereHas('roleModel', fn ($q) => $q->where('slug', '!=', 'student'))
+                ->first();
         }
 
         $student = Student::query()
@@ -69,18 +71,10 @@ class AuthService
             ->first();
 
         if ($student) {
-            return $student->user;
+            return $student->user?->load('roleModel');
         }
 
-        // Staff login by email only — mobile is NOT used for authentication
-        return User::query()
-            ->where('email', $login)
-            ->whereIn('role', [
-                UserRole::SuperAdmin->value,
-                UserRole::Admin->value,
-                UserRole::CollegeCoordinator->value,
-            ])
-            ->first();
+        return null;
     }
 
     public function sendPasswordResetOtp(string $identifier): void
@@ -136,13 +130,15 @@ class AuthService
         $record->update(['is_used' => true]);
     }
 
-    public function registerStaff(array $data, UserRole $role): User
+    public function registerStaff(array $data, int $roleId): User
     {
+        $role = Role::assignable()->findOrFail($roleId);
+
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'] ?? null,
-            'role' => $role,
+            'role_id' => $role->id,
             'password' => $data['password'],
             'is_active' => true,
         ]);

@@ -1,14 +1,38 @@
 import { onMounted, ref } from 'vue'
 
 export function unwrapList(res) {
-  const raw = res?.data
-  if (Array.isArray(raw)) {
-    return { items: raw, meta: res.meta }
+  if (!res) {
+    return { items: [], meta: null }
   }
-  if (raw?.data && Array.isArray(raw.data)) {
-    return { items: raw.data, meta: res.meta }
+
+  // Already normalized by caller
+  if (Array.isArray(res.items)) {
+    return { items: res.items, meta: res.meta ?? null }
   }
-  return { items: [], meta: res.meta }
+
+  // Standard envelope from apiFetch: { success, data: [...], meta }
+  if (res.success === true && Array.isArray(res.data)) {
+    return { items: res.data, meta: res.meta ?? null }
+  }
+
+  const payload = res.data !== undefined ? res : { data: res, meta: res.meta }
+  let items = payload.data
+  let meta = payload.meta ?? null
+
+  if (items && typeof items === 'object' && !Array.isArray(items)) {
+    if (Array.isArray(items.data)) {
+      meta = items.meta ?? meta
+      items = items.data
+    } else {
+      items = Object.values(items).filter((row) => row && typeof row === 'object' && 'id' in row)
+    }
+  }
+
+  if (!Array.isArray(items)) {
+    items = []
+  }
+
+  return { items, meta }
 }
 
 export function parseApiError(e) {
