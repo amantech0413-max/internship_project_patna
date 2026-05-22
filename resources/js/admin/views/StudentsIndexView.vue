@@ -16,48 +16,57 @@
     </div>
 
     <div class="card table-card mb-3">
-      <div class="card-body row g-2 align-items-end">
-        <div class="col-md-3">
-          <label class="form-label small text-muted mb-1">Search</label>
-          <input
-            v-model="filters.search"
-            class="form-control"
-            placeholder="Name, code, mobile..."
-            @keyup.enter="applyFilters"
-          />
+      <div class="card-body admin-filter-bar">
+        <div class="admin-filter-fields">
+          <div class="admin-filter-field">
+            <label class="form-label small text-muted mb-1">Search</label>
+            <input
+              v-model="filters.search"
+              class="form-control"
+              placeholder="Name, code, mobile..."
+              @keyup.enter="applyFilters"
+            />
+          </div>
+          <div class="admin-filter-field admin-filter-field--narrow">
+            <label class="form-label small text-muted mb-1">Mobile</label>
+            <input
+              v-model="filters.mobile"
+              class="form-control"
+              placeholder="10 digits"
+              maxlength="10"
+              @keyup.enter="applyFilters"
+            />
+          </div>
+          <div class="admin-filter-field admin-filter-field--narrow">
+            <label class="form-label small text-muted mb-1">Status</label>
+            <select v-model="filters.status" class="form-select">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="admin-filter-field">
+            <label class="form-label small text-muted mb-1">College</label>
+            <select v-model="filters.college_id" class="form-select">
+              <option value="">All Colleges</option>
+              <option v-for="c in colleges" :key="c.id" :value="String(c.id)">{{ c.college_name }}</option>
+            </select>
+          </div>
+          <div class="admin-filter-field admin-filter-field--narrow">
+            <label class="form-label small text-muted mb-1">Mode</label>
+            <select v-model="filters.internship_mode" class="form-select">
+              <option value="">All Modes</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
         </div>
-        <div class="col-md-2">
-          <label class="form-label small text-muted mb-1">Mobile</label>
-          <input
-            v-model="filters.mobile"
-            class="form-control"
-            placeholder="10 digits"
-            maxlength="10"
-            @keyup.enter="applyFilters"
-          />
-        </div>
-        <div class="col-md-2">
-          <label class="form-label small text-muted mb-1">Status</label>
-          <select v-model="filters.status" class="form-select">
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <label class="form-label small text-muted mb-1">Mode</label>
-          <select v-model="filters.internship_mode" class="form-select">
-            <option value="">All Modes</option>
-            <option value="online">Online</option>
-            <option value="offline">Offline</option>
-          </select>
-        </div>
-        <div class="col-md-3 d-flex gap-2">
-          <button type="button" class="btn btn-dark flex-grow-1" @click="applyFilters">
+        <div class="admin-filter-actions">
+          <button type="button" class="btn btn-dark text-nowrap" @click="applyFilters">
             <i class="bi bi-funnel me-1" />Filter
           </button>
-          <button type="button" class="btn btn-outline-secondary" title="Clear" @click="resetFilters">
+          <button type="button" class="btn btn-outline-secondary" title="Clear filters" @click="resetFilters">
             <i class="bi bi-x-lg" />
           </button>
         </div>
@@ -102,7 +111,7 @@ import {
   statusBadge,
 } from '@/utils/serverDataTable'
 import { alertError, confirmDelete, confirmDialog, promptText, toastSuccess } from '@/utils/swal'
-import { parseApiError } from '@/utils/apiHelpers'
+import { parseApiError, unwrapList } from '@/utils/apiHelpers'
 import { useToastStore } from '@/stores/toast'
 import { apiFetch } from '@/api/client'
 
@@ -119,13 +128,15 @@ const canExport = computed(() => auth.can('student_view'))
 const canDelete = computed(() => auth.can('student_delete'))
 const canManageStaff = computed(() => auth.can('staff_manage'))
 
-const filters = reactive({ search: '', mobile: '', status: '', internship_mode: '' })
+const colleges = ref([])
+const filters = reactive({ search: '', mobile: '', status: '', college_id: '', internship_mode: '' })
 
 const getFilterParams = () => {
   const params = {}
   if (filters.search?.trim()) params.search = filters.search.trim()
   if (filters.mobile?.trim()) params.mobile = filters.mobile.trim()
   if (filters.status) params.status = filters.status
+  if (filters.college_id) params.college_id = filters.college_id
   if (filters.internship_mode) params.internship_mode = filters.internship_mode
   return params
 }
@@ -304,11 +315,22 @@ const resetFilters = () => {
   filters.search = ''
   filters.mobile = ''
   filters.status = ''
+  filters.college_id = ''
   filters.internship_mode = ''
   applyFilters()
 }
 
+const loadColleges = async () => {
+  try {
+    const res = await apiFetch('/admin/colleges/dropdown')
+    colleges.value = unwrapList(res).items
+  } catch {
+    colleges.value = []
+  }
+}
+
 onMounted(async () => {
+  await loadColleges()
   await nextTick()
   initTable()
   tableRef.value?.addEventListener('click', onTableClick)

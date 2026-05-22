@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\V1\Admin\CollegeController;
 use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\ExcelImportLogController;
 use App\Http\Controllers\Api\V1\Admin\InternshipGroupController;
-use App\Http\Controllers\Api\V1\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Api\V1\Admin\RoleController;
 use App\Http\Controllers\Api\V1\Admin\StaffStudentController;
 use App\Http\Controllers\Api\V1\Admin\StaffUserController;
@@ -14,6 +13,8 @@ use App\Http\Controllers\Api\V1\Admin\WhatsappMessageController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\PublicRegistrationController;
 use App\Http\Controllers\Api\V1\Admin\BinController;
+use App\Http\Controllers\Api\V1\Admin\BulkStudentController;
+use App\Http\Controllers\Api\V1\Admin\BulkStudentReportController;
 use App\Http\Controllers\Api\V1\Staff\StaffStudentImportController;
 use App\Http\Controllers\Api\V1\StudentDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +56,9 @@ Route::prefix('v1')->group(function () {
         Route::prefix('admin')->middleware('role:super_admin,admin,college_coordinator')->group(function () {
             Route::get('dashboard', [DashboardController::class, 'index']);
 
+            Route::get('reports/bulk-entries', [BulkStudentReportController::class, 'index'])
+                ->middleware('role:super_admin,admin');
+
             // Roles & permissions (super_admin only)
             Route::middleware('role:super_admin')->group(function () {
                 Route::get('roles/permissions', [RoleController::class, 'permissions']);
@@ -71,7 +75,7 @@ Route::prefix('v1')->group(function () {
 
             // College dropdown for entry + college modules
             Route::get('colleges/dropdown', [CollegeController::class, 'dropdown'])
-                ->middleware('permission:staff_entry,college_manage,student_view,student_edit');
+                ->middleware('permission:staff_entry,college_manage,student_view,student_edit,bulk_student_view,bulk_student_create,bulk_student_edit');
 
             Route::middleware('permission:college_manage')->group(function () {
                 Route::apiResource('colleges', CollegeController::class)->except(['create', 'edit']);
@@ -82,6 +86,24 @@ Route::prefix('v1')->group(function () {
                 Route::get('staff-students', [StaffStudentController::class, 'index']);
                 Route::post('staff-students', [StaffStudentController::class, 'store']);
                 Route::get('import-logs', [ExcelImportLogController::class, 'index']);
+            });
+
+            Route::middleware('permission:bulk_student_view')->group(function () {
+                Route::get('bulk-students', [BulkStudentController::class, 'index']);
+                Route::get('bulk-students/{id}', [BulkStudentController::class, 'show']);
+            });
+
+            Route::middleware('permission:bulk_student_create')->group(function () {
+                Route::post('bulk-students', [BulkStudentController::class, 'store']);
+            });
+
+            Route::middleware('permission:bulk_student_edit')->group(function () {
+                Route::put('bulk-students/{id}', [BulkStudentController::class, 'update']);
+                Route::patch('bulk-students/{id}', [BulkStudentController::class, 'update']);
+            });
+
+            Route::middleware('permission:bulk_student_delete')->group(function () {
+                Route::delete('bulk-students/{id}', [BulkStudentController::class, 'destroy']);
             });
 
             // Full internship student management
@@ -130,22 +152,16 @@ Route::prefix('v1')->group(function () {
                 Route::delete('bin/force', [BinController::class, 'forceDestroy']);
             });
 
-            // Internship groups, WhatsApp, notifications (admin / full staff)
+            // WhatsApp (+ groups API for group dropdown only)
             Route::post('whatsapp/preview-students', [WhatsAppController::class, 'previewStudents']);
             Route::post('whatsapp/send-messages', [WhatsAppController::class, 'sendMessages']);
 
-            Route::apiResource('groups', InternshipGroupController::class);
-            Route::post('groups/{group}/assign', [InternshipGroupController::class, 'assignStudents']);
-            Route::post('groups/{group}/unassign', [InternshipGroupController::class, 'unassignStudents']);
-            Route::get('groups/{group}/available-students', [InternshipGroupController::class, 'availableStudents']);
-            Route::post('groups/{group}/whatsapp/send', [InternshipGroupController::class, 'sendWhatsappInvitations']);
+            Route::get('groups', [InternshipGroupController::class, 'index']);
+            Route::get('groups/{group}', [InternshipGroupController::class, 'show']);
 
             Route::get('whatsapp/messages', [WhatsappMessageController::class, 'index']);
             Route::post('whatsapp/messages/retry-failed', [WhatsappMessageController::class, 'retryFailed']);
             Route::post('whatsapp/messages/{whatsappMessage}/resend', [WhatsappMessageController::class, 'resend']);
-
-            Route::get('notifications', [AdminNotificationController::class, 'index']);
-            Route::post('notifications/broadcast', [AdminNotificationController::class, 'broadcast']);
         });
 
         Route::prefix('staff')->middleware(['role:super_admin,admin,college_coordinator', 'permission:staff_entry'])->group(function () {

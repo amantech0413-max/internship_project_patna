@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Imports\StudentImport;
 use App\Models\ExcelImportLog;
-use App\Repositories\Contracts\StaffStudentRepositoryInterface;
+use App\Repositories\Contracts\BulkStudentRepositoryInterface;
 use App\Support\IndianMobile;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -14,7 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StaffStudentImportService
 {
-    public function __construct(protected StaffStudentRepositoryInterface $students) {}
+    public function __construct(protected BulkStudentRepositoryInterface $students) {}
 
     /**
      * @return array{import_token: string, rows: array<int, array>, invalid_count: int, total: int}
@@ -88,7 +88,6 @@ class StaffStudentImportService
                     'student_name' => $studentName,
                     'mobile_number' => $validation['mobile'],
                     'created_by' => $importedBy,
-                    'status' => 'approved',
                 ]);
                 $success++;
             } catch (\Throwable $e) {

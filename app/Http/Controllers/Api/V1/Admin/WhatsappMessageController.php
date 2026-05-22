@@ -17,7 +17,7 @@ class WhatsappMessageController extends Controller
     {
         $logs = $this->whatsapp->paginateLogs(
             $request->only(['internship_group_id', 'status', 'mobile']),
-            (int) $request->get('per_page', 20)
+            (int) $request->get('per_page', 10)
         );
 
         return $this->success(WhatsappMessageResource::collection($logs));

@@ -71,12 +71,25 @@
                   placeholder="Auto from name if empty (e.g. my-college-name)"
                   pattern="[a-z0-9]+(-[a-z0-9]+)*"
                 />
-                <p class="form-text mb-0">Used in URL: /admin/register/<strong>slug</strong>. Must be unique.</p>
+                <p class="form-text mb-0">
+                  Leave empty to auto-generate from college name. On edit, slug stays the same unless you change it here manually.
+                </p>
               </div>
-              <p v-if="registrationUrl" class="col-12 small text-muted mb-0">
-                Registration link:
-                <a :href="registrationUrl" target="_blank" rel="noopener">{{ registrationUrl }}</a>
-              </p>
+              <div v-if="registrationUrls.short" class="col-12 small text-muted">
+                <p class="mb-1 fw-medium">Registration links (all open the same form):</p>
+                <p class="mb-1">
+                  Short:
+                  <a :href="registrationUrls.short" target="_blank" rel="noopener">{{ registrationUrls.short }}</a>
+                </p>
+                <p class="mb-1">
+                  /register/:
+                  <a :href="registrationUrls.register" target="_blank" rel="noopener">{{ registrationUrls.register }}</a>
+                </p>
+                <p class="mb-0">
+                  /admin/register/:
+                  <a :href="registrationUrls.admin" target="_blank" rel="noopener">{{ registrationUrls.admin }}</a>
+                </p>
+              </div>
               <div class="col-12">
                 <label class="form-label">Address</label>
                 <textarea v-model="form.address" class="form-control" rows="2" />
@@ -122,6 +135,7 @@ import {
   statusBadge,
 } from '@/utils/serverDataTable'
 import { alertError, confirmDelete, toastSuccess } from '@/utils/swal'
+import { collegeRegistrationPath } from '@/utils/registrationPaths'
 
 const modalEl = ref(null)
 const tableRef = ref(null)
@@ -143,9 +157,16 @@ const form = reactive({
   status: 'active',
 })
 
-const registrationUrl = computed(() => {
+const registrationUrls = computed(() => {
   const s = String(form.slug || '').trim()
-  return s ? `${window.location.origin}/admin/register/${s}` : ''
+  if (!s) {
+    return { short: '', register: '', admin: '' }
+  }
+  return {
+    short: collegeRegistrationPath(s, 'short'),
+    register: collegeRegistrationPath(s, 'register'),
+    admin: collegeRegistrationPath(s, 'admin'),
+  }
 })
 
 const getFilterParams = () => {

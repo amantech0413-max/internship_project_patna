@@ -10,6 +10,7 @@ class WhatsappMessage extends Model
 {
     protected $fillable = [
         'student_id',
+        'bulk_student_id',
         'college_id',
         'internship_group_id',
         'sent_by',
@@ -36,6 +37,11 @@ class WhatsappMessage extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function bulkStudent(): BelongsTo
+    {
+        return $this->belongsTo(BulkStudent::class);
     }
 
     public function college(): BelongsTo

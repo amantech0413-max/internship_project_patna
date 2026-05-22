@@ -35,11 +35,9 @@ class CollegeService
     public function store(array $data): College
     {
         $slugInput = isset($data['slug']) ? trim((string) $data['slug']) : '';
-        $slug = $slugInput !== ''
-            ? $slugInput
-            : $this->slugFromName($data['college_name']);
-
-        $data['slug'] = $this->assertUniqueSlug(new College, $slug);
+        $data['slug'] = $slugInput !== ''
+            ? $this->assertUniqueSlug(new College, $slugInput)
+            : $this->makeUniqueSlug(new College, $data['college_name']);
 
         return $this->colleges->create($data);
     }
@@ -52,15 +50,17 @@ class CollegeService
             return null;
         }
 
+        // Slug changes only when admin manually sets a new slug (not when college name changes).
         if (array_key_exists('slug', $data)) {
             $slugInput = trim((string) ($data['slug'] ?? ''));
-            $slug = $slugInput !== '' ? $slugInput : $college->slug;
 
-            if ($slug !== $college->slug) {
-                $data['slug'] = $this->assertUniqueSlug(new College, $slug, $college->id);
-            } else {
+            if ($slugInput === '' || $slugInput === $college->slug) {
                 unset($data['slug']);
+            } else {
+                $data['slug'] = $this->assertUniqueSlug(new College, $slugInput, $college->id);
             }
+        } else {
+            unset($data['slug']);
         }
 
         return $this->colleges->update($college, $data);

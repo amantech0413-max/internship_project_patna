@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Support\RegistrationPaths;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -13,7 +14,8 @@ class CollegeResource extends JsonResource
             'id' => $this->id,
             'college_name' => $this->college_name,
             'slug' => $this->slug,
-            'registration_url' => $this->slug ? url('/admin/register/'.$this->slug) : null,
+            'registration_url' => RegistrationPaths::collegeUrl($this->slug, 'short'),
+            'registration_urls' => RegistrationPaths::collegeUrls($this->slug),
             'address' => $this->address,
             'contact_person' => $this->contact_person,
             'mobile_number' => $this->mobile_number,

@@ -16,7 +16,7 @@
       <ul v-else class="register-college-list">
         <li v-for="college in colleges" :key="college.slug">
           <router-link
-            :to="{ name: 'register-college', params: { slug: college.slug } }"
+            :to="collegeRegisterRoute(college.slug)"
             class="register-college-link"
           >
             <i class="bi bi-mortarboard" />
@@ -36,6 +36,7 @@
 import { onMounted, ref } from 'vue'
 import { getPublicApi } from '@/api/client'
 import RegisterPageShell from '@/components/RegisterPageShell.vue'
+import { collegeRegisterRoute } from '@/utils/registrationPaths'
 
 const colleges = ref([])
 const loading = ref(true)

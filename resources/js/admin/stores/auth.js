@@ -10,8 +10,8 @@ const FALLBACK_ROUTE_PERMISSIONS = {
   colleges: 'college_manage',
   entry: 'staff_entry',
   'import-logs': 'staff_entry',
+  'bulk-students': 'bulk_student_view',
   students: 'student_view',
-  'student-create': 'student_create',
   'student-edit': 'student_view',
   'staff-users': 'staff_manage',
   bin: 'bin_manage',
@@ -20,45 +20,44 @@ const FALLBACK_ROUTE_PERMISSIONS = {
 const FALLBACK_SUPER_ADMIN_ONLY = ['roles']
 
 const FALLBACK_ADMIN_ONLY = [
-  'groups',
-  'group-create',
-  'group-edit',
   'whatsapp',
   'reports',
   'certificates',
-  'notifications',
   'settings',
 ]
 
 const FALLBACK_MENU = [
-  { title: 'Main', items: [{ to: '/dashboard', label: 'Dashboard', icon: 'bi-speedometer2' }] },
+  { title: 'Main', items: [{ to: '/dashboard', route: 'dashboard', label: 'Dashboard', icon: 'bi-speedometer2' }] },
   {
     title: 'College & Entry',
     items: [
-      { to: '/colleges', label: 'Colleges', icon: 'bi-building', permission: 'college_manage' },
-      { to: '/entry', label: 'Add Student', icon: 'bi-person-plus', permission: 'staff_entry' },
-      { to: '/import-logs', label: 'Import Logs', icon: 'bi-file-earmark-spreadsheet', permission: 'staff_entry' },
+      { to: '/colleges', route: 'colleges', label: 'Colleges', icon: 'bi-building', permission: 'college_manage' },
+      { to: '/entry', route: 'entry', label: 'Add Student', icon: 'bi-person-plus', permission: 'staff_entry' },
+      { to: '/import-logs', route: 'import-logs', label: 'Import Logs', icon: 'bi-file-earmark-spreadsheet', permission: 'staff_entry' },
     ],
   },
-  { title: 'Students', items: [{ to: '/students', label: 'Students', icon: 'bi-people', permission: 'student_view' }] },
+  {
+    title: 'Bulk Students',
+    items: [{ to: '/bulk-students', route: 'bulk-students', label: 'Bulk Students', icon: 'bi-person-lines-fill', permission: 'bulk_student_view' }],
+  },
+  { title: 'Students', items: [{ to: '/students', route: 'students', label: 'Students', icon: 'bi-people', permission: 'student_view' }] },
   {
     title: 'Internship (Full)',
     items: [
-      { to: '/groups', label: 'Internship Groups', icon: 'bi-collection', admin_only: true },
-      { to: '/whatsapp', label: 'WhatsApp', icon: 'bi-whatsapp', admin_only: true },
-      { to: '/reports', label: 'Reports', icon: 'bi-bar-chart', admin_only: true },
-      { to: '/certificates', label: 'Certificates', icon: 'bi-award', admin_only: true },
-      { to: '/notifications', label: 'Notifications', icon: 'bi-bell', admin_only: true },
-      { to: '/settings', label: 'Settings', icon: 'bi-gear', admin_only: true },
+      { to: '/whatsapp', route: 'whatsapp', label: 'WhatsApp', icon: 'bi-whatsapp', admin_only: true },
+      { to: '/reports', route: 'reports', label: 'Reports', icon: 'bi-bar-chart', admin_only: true },
+      { to: '/certificates', route: 'certificates', label: 'Certificates', icon: 'bi-award', admin_only: true },
+      { to: '/settings', route: 'settings', label: 'Settings', icon: 'bi-gear', admin_only: true },
     ],
   },
   {
     title: 'Administration',
     items: [
-      { to: '/roles', label: 'Roles & Permissions', icon: 'bi-shield-lock', super_admin_only: true },
-      { to: '/staff-users', label: 'Staff Users', icon: 'bi-person-badge', permission: 'staff_manage' },
+      { to: '/roles', route: 'roles', label: 'Roles & Permissions', icon: 'bi-shield-lock', super_admin_only: true },
+      { to: '/staff-users', route: 'staff-users', label: 'Staff Users', icon: 'bi-person-badge', permission: 'staff_manage' },
       {
         to: '/bin',
+        route: 'bin',
         label: 'Recycle Bin',
         icon: 'bi-trash',
         permissions: ['bin_manage', 'bin_delete_permanent'],

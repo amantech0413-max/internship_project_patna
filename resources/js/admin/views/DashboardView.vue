@@ -31,8 +31,7 @@
           <router-link v-if="auth.can('staff_entry')" to="/entry" class="btn btn-primary btn-sm">Staff Entry</router-link>
           <router-link v-if="auth.can('college_manage')" to="/colleges" class="btn btn-outline-primary btn-sm">Colleges</router-link>
           <router-link v-if="auth.can('student_view')" to="/students" class="btn btn-outline-primary btn-sm">All Students</router-link>
-          <router-link v-if="auth.can('student_create')" to="/students/create" class="btn btn-outline-secondary btn-sm">Add Full Student</router-link>
-          <router-link v-if="auth.isAdmin" to="/groups" class="btn btn-outline-secondary btn-sm">Groups</router-link>
+          <router-link v-if="auth.can('bulk_student_view')" to="/bulk-students" class="btn btn-outline-primary btn-sm">Bulk Students</router-link>
           <router-link v-if="auth.isAdmin" to="/whatsapp" class="btn btn-outline-success btn-sm">WhatsApp</router-link>
         </div>
       </div>

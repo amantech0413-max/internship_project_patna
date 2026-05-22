@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\BulkStudent;
 use App\Models\InternshipGroup;
-use App\Models\Student;
 use App\Services\WhatsApp\WhatsappMessageService;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +19,7 @@ class WhatsAppService
         ?int $startStudentId = null,
         ?int $endStudentId = null
     ): Collection {
-        $query = Student::query()
+        $query = BulkStudent::query()
             ->whereNotNull('mobile_number')
             ->where('mobile_number', '!=', '');
 
@@ -43,7 +43,7 @@ class WhatsAppService
             $query->whereIn('id', $studentIds);
         }
 
-        $students = $query->orderBy('id')->get(['id', 'student_name', 'student_code', 'mobile_number', 'college_id']);
+        $students = $query->orderBy('id')->get(['id', 'student_name', 'mobile_number', 'college_id']);
 
         if ($students->isEmpty()) {
             throw ValidationException::withMessages([
@@ -65,10 +65,10 @@ class WhatsAppService
 
         return [
             'count' => $students->count(),
-            'students' => $students->map(fn (Student $s) => [
+            'students' => $students->map(fn (BulkStudent $s) => [
                 'id' => $s->id,
                 'student_name' => $s->student_name,
-                'student_code' => $s->student_code,
+                'student_code' => null,
                 'mobile_number' => $s->mobile_number,
                 'college_id' => $s->college_id,
             ])->values()->all(),

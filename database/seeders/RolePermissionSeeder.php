@@ -54,13 +54,21 @@ class RolePermissionSeeder extends Seeder
                 'slug' => 'entry-operator',
                 'name' => 'Entry Operator',
                 'description' => 'Staff entry + import only',
-                'keys' => [StaffPermissions::STAFF_ENTRY],
+                'keys' => [
+                    StaffPermissions::STAFF_ENTRY,
+                    StaffPermissions::BULK_STUDENT_VIEW,
+                    StaffPermissions::BULK_STUDENT_CREATE,
+                ],
             ],
             [
                 'slug' => 'student-viewer',
                 'name' => 'Student Viewer',
                 'description' => 'View students and entry',
-                'keys' => [StaffPermissions::STAFF_ENTRY, StaffPermissions::STUDENT_VIEW],
+                'keys' => [
+                    StaffPermissions::STAFF_ENTRY,
+                    StaffPermissions::BULK_STUDENT_VIEW,
+                    StaffPermissions::STUDENT_VIEW,
+                ],
             ],
             [
                 'slug' => 'student-manager',
@@ -68,6 +76,10 @@ class RolePermissionSeeder extends Seeder
                 'description' => 'View, create, edit, approve students',
                 'keys' => [
                     StaffPermissions::STAFF_ENTRY,
+                    StaffPermissions::BULK_STUDENT_VIEW,
+                    StaffPermissions::BULK_STUDENT_CREATE,
+                    StaffPermissions::BULK_STUDENT_EDIT,
+                    StaffPermissions::BULK_STUDENT_DELETE,
                     StaffPermissions::STUDENT_VIEW,
                     StaffPermissions::STUDENT_CREATE,
                     StaffPermissions::STUDENT_EDIT,
@@ -79,7 +91,14 @@ class RolePermissionSeeder extends Seeder
                 'slug' => 'college-coordinator-role',
                 'name' => 'College Manager',
                 'description' => 'Manage colleges + entry',
-                'keys' => [StaffPermissions::COLLEGE_MANAGE, StaffPermissions::STAFF_ENTRY, StaffPermissions::STUDENT_VIEW],
+                'keys' => [
+                    StaffPermissions::COLLEGE_MANAGE,
+                    StaffPermissions::STAFF_ENTRY,
+                    StaffPermissions::BULK_STUDENT_VIEW,
+                    StaffPermissions::BULK_STUDENT_CREATE,
+                    StaffPermissions::BULK_STUDENT_EDIT,
+                    StaffPermissions::STUDENT_VIEW,
+                ],
             ],
             [
                 'slug' => 'full-staff-panel',

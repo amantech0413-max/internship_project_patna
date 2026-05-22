@@ -12,6 +12,7 @@
           :key="item.to"
           :to="item.to"
           class="nav-link"
+          :class="{ active: isMenuActive(item) }"
           @click="$emit('navigate')"
         >
           <i :class="`bi ${item.icon} me-2`" />{{ item.label }}
@@ -25,14 +26,31 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { apiFetch } from '@/api/client'
 
 defineEmits(['navigate'])
 
+const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+
+/** Highlight parent menu for nested routes (e.g. student edit → Students). */
+const isMenuActive = (item) => {
+  const name = route.name
+  const key = item.route
+
+  if (key === 'students') {
+    return name === 'students' || name === 'student-edit'
+  }
+
+  if (key) {
+    return name === key
+  }
+
+  return route.path === item.to || route.path.startsWith(`${item.to}/`)
+}
 
 const logout = async () => {
   try {

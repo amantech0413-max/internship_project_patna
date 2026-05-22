@@ -10,6 +10,14 @@ class StaffPermissions
 {
     public const STAFF_ENTRY = 'staff_entry';
 
+    public const BULK_STUDENT_VIEW = 'bulk_student_view';
+
+    public const BULK_STUDENT_CREATE = 'bulk_student_create';
+
+    public const BULK_STUDENT_EDIT = 'bulk_student_edit';
+
+    public const BULK_STUDENT_DELETE = 'bulk_student_delete';
+
     public const STUDENT_VIEW = 'student_view';
 
     public const STUDENT_CREATE = 'student_create';
@@ -33,6 +41,10 @@ class StaffPermissions
     {
         return [
             self::STAFF_ENTRY,
+            self::BULK_STUDENT_VIEW,
+            self::BULK_STUDENT_CREATE,
+            self::BULK_STUDENT_EDIT,
+            self::BULK_STUDENT_DELETE,
             self::STUDENT_VIEW,
             self::STUDENT_CREATE,
             self::STUDENT_EDIT,
@@ -50,6 +62,10 @@ class StaffPermissions
     {
         return [
             self::STAFF_ENTRY => true,
+            self::BULK_STUDENT_VIEW => true,
+            self::BULK_STUDENT_CREATE => true,
+            self::BULK_STUDENT_EDIT => false,
+            self::BULK_STUDENT_DELETE => false,
             self::STUDENT_VIEW => true,
             self::STUDENT_CREATE => false,
             self::STUDENT_EDIT => false,
@@ -87,6 +103,10 @@ class StaffPermissions
     {
         return [
             self::STAFF_ENTRY => 'Staff Entry & Excel Import',
+            self::BULK_STUDENT_VIEW => 'View Bulk Students',
+            self::BULK_STUDENT_CREATE => 'Create Bulk Students',
+            self::BULK_STUDENT_EDIT => 'Edit Bulk Students',
+            self::BULK_STUDENT_DELETE => 'Delete Bulk Students',
             self::STUDENT_VIEW => 'View Students',
             self::STUDENT_CREATE => 'Create Students',
             self::STUDENT_EDIT => 'Edit Students',

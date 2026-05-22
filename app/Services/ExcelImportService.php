@@ -3,14 +3,14 @@
 namespace App\Services;
 
 use App\Models\ExcelImportLog;
-use App\Repositories\Contracts\StaffStudentRepositoryInterface;
+use App\Repositories\Contracts\BulkStudentRepositoryInterface;
 use App\Support\IndianMobile;
 use Illuminate\Http\UploadedFile;
 use ZipArchive;
 
 class ExcelImportService
 {
-    public function __construct(protected StaffStudentRepositoryInterface $students) {}
+    public function __construct(protected BulkStudentRepositoryInterface $students) {}
 
     /**
      * @return array{rows: array<int, array{row: int, student_name: string, mobile_number: string, valid: bool, error?: string}>, invalid_count: int}
@@ -76,7 +76,6 @@ class ExcelImportService
                     'student_name' => $studentName,
                     'mobile_number' => $validation['mobile'],
                     'created_by' => $importedBy,
-                    'status' => 'approved',
                 ]);
                 $success++;
             } catch (\Throwable $e) {

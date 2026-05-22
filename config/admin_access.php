@@ -7,8 +7,8 @@ return [
         'colleges' => StaffPermissions::COLLEGE_MANAGE,
         'entry' => StaffPermissions::STAFF_ENTRY,
         'import-logs' => StaffPermissions::STAFF_ENTRY,
+        'bulk-students' => StaffPermissions::BULK_STUDENT_VIEW,
         'students' => StaffPermissions::STUDENT_VIEW,
-        'student-create' => StaffPermissions::STUDENT_CREATE,
         'student-edit' => StaffPermissions::STUDENT_VIEW,
         'staff-users' => StaffPermissions::STAFF_MANAGE,
         'bin' => StaffPermissions::BIN_MANAGE,
@@ -19,13 +19,9 @@ return [
     ],
 
     'admin_only_routes' => [
-        'groups',
-        'group-create',
-        'group-edit',
         'whatsapp',
         'reports',
         'certificates',
-        'notifications',
         'settings',
     ],
 
@@ -45,6 +41,12 @@ return [
             ],
         ],
         [
+            'title' => 'Bulk Students',
+            'items' => [
+                ['to' => '/bulk-students', 'route' => 'bulk-students', 'label' => 'Bulk Students', 'icon' => 'bi-person-lines-fill', 'permission' => StaffPermissions::BULK_STUDENT_VIEW],
+            ],
+        ],
+        [
             'title' => 'Students',
             'items' => [
                 ['to' => '/students', 'route' => 'students', 'label' => 'Students', 'icon' => 'bi-people', 'permission' => StaffPermissions::STUDENT_VIEW],
@@ -53,11 +55,9 @@ return [
         [
             'title' => 'Internship (Full)',
             'items' => [
-                ['to' => '/groups', 'route' => 'groups', 'label' => 'Internship Groups', 'icon' => 'bi-collection', 'admin_only' => true],
                 ['to' => '/whatsapp', 'route' => 'whatsapp', 'label' => 'WhatsApp', 'icon' => 'bi-whatsapp', 'admin_only' => true],
                 ['to' => '/reports', 'route' => 'reports', 'label' => 'Reports', 'icon' => 'bi-bar-chart', 'admin_only' => true],
                 ['to' => '/certificates', 'route' => 'certificates', 'label' => 'Certificates', 'icon' => 'bi-award', 'admin_only' => true],
-                ['to' => '/notifications', 'route' => 'notifications', 'label' => 'Notifications', 'icon' => 'bi-bell', 'admin_only' => true],
                 ['to' => '/settings', 'route' => 'settings', 'label' => 'Settings', 'icon' => 'bi-gear', 'admin_only' => true],
             ],
         ],

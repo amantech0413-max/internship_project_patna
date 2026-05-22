@@ -1,8 +1,10 @@
 import { DataTable } from '@/utils/jquerySetup'
 import { http } from '@/api/client'
 
-/** Default: 10 rows; dropdown 50, 100; type any number for custom page size */
-export const DEFAULT_LENGTH_MENU = [10, 50, 100]
+import { DEFAULT_PER_PAGE, PER_PAGE_PRESETS } from '@/utils/pagination'
+
+/** Default: 10 rows; dropdown 50, 100; custom number input beside control */
+export const DEFAULT_LENGTH_MENU = PER_PAGE_PRESETS
 
 /**
  * Server-side DataTable wired to Laravel API: { success, data: [], meta: { total, ... } }
@@ -25,13 +27,16 @@ export function initServerDataTable(tableEl, config = {}) {
 
   const columnSortKeys = config.columnSortKeys || []
   const lengthMenu = config.lengthMenu ?? DEFAULT_LENGTH_MENU
+  const enableCustomPageLength = config.enableCustomPageLength !== false
+
+  const userInitComplete = config.tableOptions?.initComplete
 
   const dt = new DataTable(el, {
     processing: true,
     serverSide: true,
     paging: true,
-    pageLength: config.pageLength ?? 10,
-    lengthMenu,
+    pageLength: config.pageLength ?? DEFAULT_PER_PAGE,
+    lengthMenu: [lengthMenu, lengthMenu.map(String)],
     order: config.defaultOrder ?? [[0, 'desc']],
     searching: config.searching ?? false,
     autoWidth: false,
@@ -39,7 +44,6 @@ export function initServerDataTable(tableEl, config = {}) {
       topStart: {
         pageLength: {
           menu: lengthMenu,
-          input: true,
         },
       },
       topEnd: 'info',
@@ -64,7 +68,7 @@ export function initServerDataTable(tableEl, config = {}) {
           ? columnSortKeys[order.column]
           : config.defaultSortBy || columnSortKeys.find(Boolean) || 'created_at'
       const sortDir = order?.dir === 'asc' ? 'asc' : 'desc'
-      const perPage = requestData.length || config.pageLength || 10
+      const perPage = requestData.length || config.pageLength || DEFAULT_PER_PAGE
       const page = Math.floor(requestData.start / perPage) + 1
       const params = {
         page,
@@ -99,6 +103,40 @@ export function initServerDataTable(tableEl, config = {}) {
     columns: config.columns,
     columnDefs: config.columnDefs,
     ...config.tableOptions,
+    initComplete(...args) {
+      if (enableCustomPageLength) {
+        const api = this.api()
+        const container = api.table().container()
+        const lengthCell = container?.querySelector('.dt-length')
+        if (lengthCell && !lengthCell.querySelector('[data-dt-custom-len]')) {
+          const input = document.createElement('input')
+          input.type = 'number'
+          input.min = '1'
+          input.max = '500'
+          input.placeholder = 'Custom'
+          input.setAttribute('data-dt-custom-len', '1')
+          input.className = 'form-control form-control-sm d-inline-block ms-1'
+          input.style.width = '5rem'
+          input.title = 'Custom entries per page'
+          const apply = () => {
+            const v = parseInt(input.value, 10)
+            if (v > 0 && v <= 500) {
+              api.page.len(v).draw(false)
+            }
+          }
+          input.addEventListener('change', apply)
+          input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') {
+              ev.preventDefault()
+              apply()
+            }
+          })
+          lengthCell.appendChild(document.createTextNode(' '))
+          lengthCell.appendChild(input)
+        }
+      }
+      userInitComplete?.apply(this, args)
+    },
   })
 
   return dt

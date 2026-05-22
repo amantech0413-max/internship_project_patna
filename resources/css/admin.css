@@ -80,9 +80,11 @@ body.admin-menu-open {
 }
 
 .sidebar .nav-link:hover,
+.sidebar .nav-link.active,
 .sidebar .nav-link.router-link-active {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.22);
   color: #fff;
+  font-weight: 600;
 }
 
 .card-stat,
@@ -120,6 +122,59 @@ table.dataTable tbody td {
   width: auto;
   display: inline-block;
   min-width: 4.5rem;
+}
+
+.dataTables_wrapper .dt-length input[data-dt-custom-len] {
+  vertical-align: middle;
+}
+
+/* Filter row: fields grow, action buttons stay on same row */
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.admin-filter-fields {
+  display: flex;
+  flex: 1 1 320px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.75rem;
+  min-width: 0;
+}
+
+.admin-filter-field {
+  flex: 1 1 160px;
+  min-width: 130px;
+  max-width: 220px;
+}
+
+.admin-filter-field--narrow {
+  flex: 0 1 120px;
+  min-width: 110px;
+  max-width: 140px;
+}
+
+.admin-filter-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+@media (max-width: 575.98px) {
+  .admin-filter-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: stretch;
+  }
+
+  .admin-filter-actions .btn-dark {
+    flex: 1;
+  }
 }
 
 .dataTables_wrapper .dt-info,

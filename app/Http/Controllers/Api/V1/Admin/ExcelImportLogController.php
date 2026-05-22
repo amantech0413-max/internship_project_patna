@@ -15,8 +15,12 @@ class ExcelImportLogController extends Controller
         $paginator = ExcelImportLog::query()
             ->with(['college:id,college_name', 'importer:id,name'])
             ->when($request->filled('college_id'), fn ($q) => $q->where('college_id', $request->college_id))
+            ->when(
+                ! $request->user()->isAdmin(),
+                fn ($q) => $q->where('imported_by', $request->user()->id)
+            )
             ->latest()
-            ->paginate((int) $request->get('per_page', 15));
+            ->paginate((int) $request->get('per_page', 10));
 
         return $this->success(ExcelImportLogResource::collection($paginator));
     }

@@ -1,50 +1,82 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { setupGuards } from './guards'
+import { isAdminSpaPath, isReservedSlug } from '@/utils/registrationPaths'
 
-const routes = [
+const useAdminBase = isAdminSpaPath()
+
+const adminBlankChildren = [
+  { path: '', name: 'home', redirect: '/login' },
+  { path: 'login', name: 'login', component: () => import('@/views/LoginView.vue') },
+  { path: 'register', name: 'register', component: () => import('@/views/RegisterHomeView.vue') },
   {
-    path: '/',
-    component: () => import('@/layouts/BlankLayout.vue'),
-    children: [
-      { path: '', name: 'home', redirect: '/login' },
-      { path: 'login', name: 'login', component: () => import('@/views/LoginView.vue') },
-      { path: 'register', name: 'register', component: () => import('@/views/RegisterHomeView.vue') },
-      {
-        path: 'register/:slug',
-        name: 'register-college',
-        component: () => import('@/views/RegisterView.vue'),
-      },
-    ],
-  },
-  {
-    path: '/',
-    component: () => import('@/layouts/AdminLayout.vue'),
-    meta: { requiresAuth: true },
-    children: [
-      { path: 'dashboard', name: 'dashboard', component: () => import('@/views/DashboardView.vue') },
-      { path: 'colleges', name: 'colleges', component: () => import('@/views/CollegesView.vue') },
-      { path: 'entry', name: 'entry', component: () => import('@/views/EntryView.vue') },
-      { path: 'import-logs', name: 'import-logs', component: () => import('@/views/ImportLogsView.vue') },
-      { path: 'students', name: 'students', component: () => import('@/views/StudentsIndexView.vue') },
-      { path: 'students/create', name: 'student-create', component: () => import('@/views/StudentCreateView.vue') },
-      { path: 'students/:id', name: 'student-edit', component: () => import('@/views/StudentEditView.vue') },
-      { path: 'roles', name: 'roles', component: () => import('@/views/RolesView.vue') },
-      { path: 'staff-users', name: 'staff-users', component: () => import('@/views/StaffUsersView.vue') },
-      { path: 'bin', name: 'bin', component: () => import('@/views/BinView.vue') },
-      { path: 'groups', name: 'groups', component: () => import('@/views/GroupsIndexView.vue') },
-      { path: 'groups/create', name: 'group-create', component: () => import('@/views/GroupCreateView.vue') },
-      { path: 'groups/:id', name: 'group-edit', component: () => import('@/views/GroupEditView.vue') },
-      { path: 'whatsapp', name: 'whatsapp', component: () => import('@/views/WhatsappView.vue') },
-      { path: 'reports', name: 'reports', component: () => import('@/views/ReportsView.vue') },
-      { path: 'certificates', name: 'certificates', component: () => import('@/views/CertificatesView.vue') },
-      { path: 'notifications', name: 'notifications', component: () => import('@/views/NotificationsView.vue') },
-      { path: 'settings', name: 'settings', component: () => import('@/views/SettingsView.vue') },
-    ],
+    path: 'register/:slug',
+    name: 'register-college',
+    component: () => import('@/views/RegisterView.vue'),
   },
 ]
 
+const publicBlankChildren = [
+  { path: '', name: 'register', component: () => import('@/views/RegisterHomeView.vue') },
+  { path: 'register', redirect: { name: 'register' } },
+  {
+    path: 'register/:slug',
+    name: 'register-college',
+    component: () => import('@/views/RegisterView.vue'),
+  },
+  {
+    path: ':slug',
+    name: 'register-college-root',
+    component: () => import('@/views/RegisterView.vue'),
+    beforeEnter: (to) => {
+      if (isReservedSlug(to.params.slug)) {
+        return { name: 'register' }
+      }
+      return true
+    },
+  },
+]
+
+const adminPanelChildren = [
+  { path: 'dashboard', name: 'dashboard', component: () => import('@/views/DashboardView.vue') },
+  { path: 'colleges', name: 'colleges', component: () => import('@/views/CollegesView.vue') },
+  { path: 'entry', name: 'entry', component: () => import('@/views/EntryView.vue') },
+  { path: 'import-logs', name: 'import-logs', component: () => import('@/views/ImportLogsView.vue') },
+  { path: 'bulk-students', name: 'bulk-students', component: () => import('@/views/BulkStudentsView.vue') },
+  { path: 'students', name: 'students', component: () => import('@/views/StudentsIndexView.vue') },
+  { path: 'students/:id', name: 'student-edit', component: () => import('@/views/StudentEditView.vue') },
+  { path: 'roles', name: 'roles', component: () => import('@/views/RolesView.vue') },
+  { path: 'staff-users', name: 'staff-users', component: () => import('@/views/StaffUsersView.vue') },
+  { path: 'bin', name: 'bin', component: () => import('@/views/BinView.vue') },
+  { path: 'whatsapp', name: 'whatsapp', component: () => import('@/views/WhatsappView.vue') },
+  { path: 'reports', name: 'reports', component: () => import('@/views/ReportsView.vue') },
+  { path: 'certificates', name: 'certificates', component: () => import('@/views/CertificatesView.vue') },
+  { path: 'settings', name: 'settings', component: () => import('@/views/SettingsView.vue') },
+]
+
+const routes = useAdminBase
+  ? [
+      {
+        path: '/',
+        component: () => import('@/layouts/BlankLayout.vue'),
+        children: adminBlankChildren,
+      },
+      {
+        path: '/',
+        component: () => import('@/layouts/AdminLayout.vue'),
+        meta: { requiresAuth: true },
+        children: adminPanelChildren,
+      },
+    ]
+  : [
+      {
+        path: '/',
+        component: () => import('@/layouts/BlankLayout.vue'),
+        children: publicBlankChildren,
+      },
+    ]
+
 const router = createRouter({
-  history: createWebHistory('/admin'),
+  history: createWebHistory(useAdminBase ? '/admin' : '/'),
   routes,
   linkActiveClass: 'active',
 })

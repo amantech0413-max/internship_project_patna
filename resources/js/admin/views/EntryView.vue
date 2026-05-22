@@ -195,6 +195,77 @@
         </div>
       </div>
     </div>
+
+    <div class="card table-card mt-4">
+      <div class="card-header fw-semibold"><i class="bi bi-list-ul me-2" />My entries</div>
+      <div class="card-body border-bottom row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label small text-muted mb-1">College</label>
+          <select v-model="entryFilters.college_id" class="form-select">
+            <option value="">All colleges</option>
+            <option v-for="c in colleges" :key="'e-' + c.id" :value="String(c.id)">{{ c.college_name }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted mb-1">From</label>
+          <input v-model="entryFilters.date_from" type="date" class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted mb-1">To</label>
+          <input v-model="entryFilters.date_to" type="date" class="form-control" />
+        </div>
+        <div class="col-md-2">
+          <button type="button" class="btn btn-dark w-100" :disabled="entriesLoading" @click="loadMyEntries(1)">
+            {{ entriesLoading ? '...' : 'Filter' }}
+          </button>
+        </div>
+      </div>
+      <div class="px-3 py-2 border-bottom bg-body-tertiary">
+        <TablePager
+          layout="per-page-only"
+          :meta="entriesPagerMeta"
+          :per-page="entriesPerPage"
+          @update:per-page="onEntriesPerPage"
+        />
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>College</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="entriesLoading">
+              <td colspan="4" class="text-center text-muted py-4">Loading...</td>
+            </tr>
+            <template v-else>
+              <tr v-for="row in myEntries" :key="row.id">
+                <td class="small">{{ formatEntryDate(row.created_at) }}</td>
+                <td>{{ row.student_name }}</td>
+                <td>{{ row.mobile_number }}</td>
+                <td>{{ row.college?.college_name || '—' }}</td>
+              </tr>
+              <tr v-if="!myEntries.length">
+                <td colspan="4" class="text-center text-muted py-4">No entries yet</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+      <div class="px-3 pb-3">
+        <TablePager
+          v-if="entriesMeta"
+          layout="pagination-only"
+          :meta="entriesMeta"
+          :per-page="entriesPerPage"
+          @page="goEntriesPage"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -207,6 +278,8 @@ import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
 import { useToastStore } from '@/stores/toast'
 import { normalizeIndianMobile } from '../utils/indianMobile'
 import { Modal } from 'bootstrap'
+import TablePager from '@/components/TablePager.vue'
+import { DEFAULT_PER_PAGE, fallbackMeta } from '@/utils/pagination'
 
 const auth = useAuthStore()
 const toast = useToastStore()
@@ -232,6 +305,14 @@ const importing = ref(false)
 const previewRows = ref([])
 const importSummary = ref(null)
 const importResult = ref(null)
+const myEntries = ref([])
+const entriesMeta = ref(null)
+const entriesLoading = ref(false)
+const entriesPage = ref(1)
+const entriesPerPage = ref(DEFAULT_PER_PAGE)
+const entryFilters = reactive({ college_id: '', date_from: '', date_to: '' })
+
+const entriesPagerMeta = computed(() => entriesMeta.value ?? fallbackMeta(entriesPerPage.value))
 
 const previewModalEl = ref(null)
 let previewModal = null
@@ -241,11 +322,50 @@ const validPreviewRows = computed(() => previewRows.value.filter((r) => r.valid)
 onMounted(async () => {
   if (previewModalEl.value) previewModal = new Modal(previewModalEl.value)
   await loadColleges()
+  await loadMyEntries()
 })
+
+const formatEntryDate = (val) => {
+  if (!val) return '—'
+  return new Date(String(val)).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
+}
 
 const loadColleges = async () => {
   const res = await apiFetch('/admin/colleges/dropdown')
-  colleges.value = res.data || []
+  colleges.value = unwrapList(res).items
+}
+
+const loadMyEntries = async (page = entriesPage.value) => {
+  entriesPage.value = page
+  entriesLoading.value = true
+  try {
+    const q = new URLSearchParams({
+      mine: '1',
+      page: String(page),
+      per_page: String(entriesPerPage.value),
+      sort_by: 'created_at',
+      sort_dir: 'desc',
+    })
+    if (entryFilters.college_id) q.set('college_id', entryFilters.college_id)
+    if (entryFilters.date_from) q.set('date_from', entryFilters.date_from)
+    if (entryFilters.date_to) q.set('date_to', entryFilters.date_to)
+    const res = await apiFetch(`/admin/staff-students?${q}`)
+    const { items, meta } = unwrapList(res)
+    myEntries.value = items
+    entriesMeta.value = meta
+  } catch {
+    myEntries.value = []
+    entriesMeta.value = null
+  } finally {
+    entriesLoading.value = false
+  }
+}
+
+const goEntriesPage = (p) => loadMyEntries(p)
+
+const onEntriesPerPage = (n) => {
+  entriesPerPage.value = n
+  loadMyEntries(1)
 }
 
 const validateStep1 = () => {
@@ -298,6 +418,7 @@ const saveEntry = async () => {
     form.student_name = ''
     form.mobile_number = ''
     step.value = 2
+    await loadMyEntries()
   } catch (e) {
     useToastStore().show(parseApiError(e), 'danger')
   } finally {
@@ -353,6 +474,7 @@ const confirmImport = async () => {
     importResult.value = res.data
     previewModal?.hide()
     useToastStore().show(res.message || 'Import completed.', 'success')
+    await loadMyEntries()
   } catch (e) {
     useToastStore().show(parseApiError(e), 'danger')
   } finally {

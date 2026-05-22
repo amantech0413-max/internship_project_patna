@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/stores/auth'
 
-const PUBLIC = ['login', 'register', 'register-college', 'home']
+const PUBLIC = ['login', 'register', 'register-college', 'register-college-root', 'home']
 
 function staffHome(auth) {
   if (auth.isAdmin) return { name: 'dashboard' }

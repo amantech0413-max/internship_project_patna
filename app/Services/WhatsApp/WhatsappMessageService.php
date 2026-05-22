@@ -5,7 +5,7 @@ namespace App\Services\WhatsApp;
 use App\Enums\WhatsappMessageStatus;
 use App\Jobs\SendWhatsappInvitationJob;
 use App\Models\InternshipGroup;
-use App\Models\Student;
+use App\Models\BulkStudent;
 use App\Models\WhatsappMessage;
 use App\Notifications\WhatsAppInvitationSentNotification;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -43,7 +43,7 @@ class WhatsappMessageService
             ]);
         }
 
-        $students = Student::query()
+        $students = BulkStudent::query()
             ->whereIn('id', $studentIds)
             ->get();
 
@@ -59,7 +59,7 @@ class WhatsappMessageService
         foreach ($students as $student) {
             if (! $resend) {
                 $existing = WhatsappMessage::query()
-                    ->where('student_id', $student->id)
+                    ->where('bulk_student_id', $student->id)
                     ->where('internship_group_id', $group->id)
                     ->where('status', WhatsappMessageStatus::Sent)
                     ->exists();
@@ -70,7 +70,8 @@ class WhatsappMessageService
             }
 
             $log = WhatsappMessage::create([
-                'student_id' => $student->id,
+                'student_id' => null,
+                'bulk_student_id' => $student->id,
                 'college_id' => $student->college_id,
                 'internship_group_id' => $group->id,
                 'sent_by' => $adminId,
@@ -89,7 +90,7 @@ class WhatsappMessageService
 
     public function processMessage(int $messageId): WhatsappMessage
     {
-        $log = WhatsappMessage::with(['student.user', 'group'])->findOrFail($messageId);
+        $log = WhatsappMessage::with(['student.user', 'bulkStudent', 'group'])->findOrFail($messageId);
 
         if ($log->status === WhatsappMessageStatus::Sent) {
             return $log;

@@ -108,6 +108,9 @@
         <button class="btn btn-sm btn-warning" @click="retryAll">Retry Failed</button>
       </div>
       <div class="card table-card">
+        <div class="px-3 py-2 border-bottom bg-body-tertiary">
+          <TablePager layout="per-page-only" :meta="pagerMeta" :per-page="perPage" @update:per-page="onPerPage" />
+        </div>
         <div class="table-responsive">
           <table class="table table-hover mb-0">
             <thead class="table-light">
@@ -121,6 +124,10 @@
               </tr>
             </thead>
             <tbody>
+              <tr v-if="logsLoading">
+                <td colspan="6" class="text-center text-muted py-4">Loading...</td>
+              </tr>
+              <template v-else>
               <tr v-for="m in messages" :key="m.id">
                 <td>{{ m.student_name }}<br><small class="text-muted">{{ m.student_code }}</small></td>
                 <td>{{ m.mobile }}</td>
@@ -131,9 +138,15 @@
                   <button v-if="m.status === 'failed'" class="btn btn-sm btn-link" @click="resend(m.id)">Resend</button>
                 </td>
               </tr>
-              <tr v-if="!messages.length"><td colspan="6" class="text-center text-muted py-4">No messages</td></tr>
+              <tr v-if="!messages.length">
+                <td colspan="6" class="text-center text-muted py-4">No messages</td>
+              </tr>
+              </template>
             </tbody>
           </table>
+        </div>
+        <div class="px-3 pb-3">
+          <TablePager v-if="logsMeta" layout="pagination-only" :meta="logsMeta" :per-page="perPage" @page="load" />
         </div>
       </div>
     </div>
@@ -145,7 +158,9 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { apiFetch, apiForm, apiDownload, getPublicApi } from '@/api/client'
-import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
+import { parseApiError, unwrapList } from '@/utils/apiHelpers'
+import TablePager from '@/components/TablePager.vue'
+import { DEFAULT_PER_PAGE, fallbackMeta } from '@/utils/pagination'
 import { useToastStore } from '@/stores/toast'
 import { useWhatsapp } from '@/composables/useWhatsapp'
 const auth = useAuthStore()
@@ -158,6 +173,10 @@ const groups = ref([])
 const collegeStudents = ref([])
 const previewStudents = ref([])
 const messages = ref([])
+const logsMeta = ref(null)
+const logsLoading = ref(false)
+const perPage = ref(DEFAULT_PER_PAGE)
+const pagerMeta = computed(() => logsMeta.value ?? fallbackMeta(perPage.value))
 const previewing = ref(false)
 const sending = ref(false)
 
@@ -242,9 +261,27 @@ const send = async () => {
   }
 }
 
-const load = async () => {
-  const res = await fetchMessages(Object.fromEntries(Object.entries(filters).filter(([, v]) => v)))
-  messages.value = unwrapList(res).items
+const load = async (page = 1) => {
+  logsLoading.value = true
+  try {
+    const params = Object.fromEntries(Object.entries(filters).filter(([, v]) => v))
+    params.page = String(page)
+    params.per_page = String(perPage.value)
+    const res = await fetchMessages(params)
+    const { items, meta } = unwrapList(res)
+    messages.value = items
+    logsMeta.value = meta
+  } catch {
+    messages.value = []
+    logsMeta.value = null
+  } finally {
+    logsLoading.value = false
+  }
+}
+
+const onPerPage = (n) => {
+  perPage.value = n
+  load(1)
 }
 
 const retryAll = async () => {

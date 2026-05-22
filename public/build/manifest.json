@@ -1,6 +1,6 @@
 {
-  "_RegisterPageShell-CjeSDhKv.js": {
-    "file": "assets/RegisterPageShell-CjeSDhKv.js",
+  "_RegisterPageShell-CVomaCdJ.js": {
+    "file": "assets/RegisterPageShell-CVomaCdJ.js",
     "name": "RegisterPageShell",
     "imports": [
       "resources/js/admin/main.js"
@@ -13,8 +13,15 @@
     "file": "assets/RegisterPageShell-mKa7R1IU.css",
     "src": "_RegisterPageShell-mKa7R1IU.css"
   },
-  "_apiHelpers-BTSILepQ.js": {
-    "file": "assets/apiHelpers-BTSILepQ.js",
+  "_TablePager-hv4AH1Ub.js": {
+    "file": "assets/TablePager-hv4AH1Ub.js",
+    "name": "TablePager",
+    "imports": [
+      "resources/js/admin/main.js"
+    ]
+  },
+  "_apiHelpers-Cn0SikLq.js": {
+    "file": "assets/apiHelpers-Cn0SikLq.js",
     "name": "apiHelpers",
     "imports": [
       "resources/js/admin/main.js"
@@ -24,27 +31,25 @@
     "file": "assets/bootstrap.esm-D7Q7Nh7Y.js",
     "name": "bootstrap.esm"
   },
-  "_serverDataTable-DM4MKLza.js": {
-    "file": "assets/serverDataTable-DM4MKLza.js",
+  "_indianMobile-D9s-dAq0.js": {
+    "file": "assets/indianMobile-D9s-dAq0.js",
+    "name": "indianMobile"
+  },
+  "_pagination-cFowRE2w.js": {
+    "file": "assets/pagination-cFowRE2w.js",
+    "name": "pagination"
+  },
+  "_serverDataTable-CGULlAU8.js": {
+    "file": "assets/serverDataTable-CGULlAU8.js",
     "name": "serverDataTable",
     "imports": [
-      "resources/js/admin/main.js"
+      "resources/js/admin/main.js",
+      "_pagination-cFowRE2w.js"
     ]
   },
-  "_studentForm-DZN3otYq.js": {
-    "file": "assets/studentForm-DZN3otYq.js",
-    "name": "studentForm"
-  },
-  "_swal-CrKuX7dn.js": {
-    "file": "assets/swal-CrKuX7dn.js",
+  "_swal-BDMA6nmd.js": {
+    "file": "assets/swal-BDMA6nmd.js",
     "name": "swal"
-  },
-  "_useWhatsapp-C-zQNdyL.js": {
-    "file": "assets/useWhatsapp-C-zQNdyL.js",
-    "name": "useWhatsapp",
-    "imports": [
-      "resources/js/admin/main.js"
-    ]
   },
   "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff": {
     "file": "assets/bootstrap-icons-BeopsB42.woff",
@@ -55,12 +60,12 @@
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
   },
   "resources/css/admin.css": {
-    "file": "assets/admin-BqdaNSNh.css",
+    "file": "assets/admin-D-YFw2la.css",
     "src": "resources/css/admin.css",
     "isEntry": true
   },
   "resources/js/admin/layouts/AdminLayout.vue": {
-    "file": "assets/AdminLayout-D_kSaLoo.js",
+    "file": "assets/AdminLayout-CPEFkC7-.js",
     "name": "AdminLayout",
     "src": "resources/js/admin/layouts/AdminLayout.vue",
     "isDynamicEntry": true,
@@ -69,7 +74,7 @@
     ]
   },
   "resources/js/admin/layouts/BlankLayout.vue": {
-    "file": "assets/BlankLayout-BCzdUVJ_.js",
+    "file": "assets/BlankLayout-fVFgBmF6.js",
     "name": "BlankLayout",
     "src": "resources/js/admin/layouts/BlankLayout.vue",
     "isDynamicEntry": true,
@@ -78,50 +83,66 @@
     ]
   },
   "resources/js/admin/main.js": {
-    "file": "assets/main-DHRrBB2E.js",
+    "file": "assets/main-Cq9FlbJI.js",
     "name": "main",
     "src": "resources/js/admin/main.js",
     "isEntry": true,
     "dynamicImports": [
-      "resources/js/admin/layouts/BlankLayout.vue",
       "resources/js/admin/views/LoginView.vue",
       "resources/js/admin/views/RegisterHomeView.vue",
       "resources/js/admin/views/RegisterView.vue",
-      "resources/js/admin/layouts/AdminLayout.vue",
+      "resources/js/admin/views/RegisterHomeView.vue",
+      "resources/js/admin/views/RegisterView.vue",
+      "resources/js/admin/views/RegisterView.vue",
       "resources/js/admin/views/DashboardView.vue",
       "resources/js/admin/views/CollegesView.vue",
       "resources/js/admin/views/EntryView.vue",
       "resources/js/admin/views/ImportLogsView.vue",
+      "resources/js/admin/views/BulkStudentsView.vue",
       "resources/js/admin/views/StudentsIndexView.vue",
-      "resources/js/admin/views/StudentCreateView.vue",
       "resources/js/admin/views/StudentEditView.vue",
       "resources/js/admin/views/RolesView.vue",
       "resources/js/admin/views/StaffUsersView.vue",
       "resources/js/admin/views/BinView.vue",
-      "resources/js/admin/views/GroupsIndexView.vue",
-      "resources/js/admin/views/GroupCreateView.vue",
-      "resources/js/admin/views/GroupEditView.vue",
       "resources/js/admin/views/WhatsappView.vue",
       "resources/js/admin/views/ReportsView.vue",
       "resources/js/admin/views/CertificatesView.vue",
-      "resources/js/admin/views/NotificationsView.vue",
-      "resources/js/admin/views/SettingsView.vue"
+      "resources/js/admin/views/SettingsView.vue",
+      "resources/js/admin/layouts/BlankLayout.vue",
+      "resources/js/admin/layouts/AdminLayout.vue",
+      "resources/js/admin/layouts/BlankLayout.vue"
     ]
   },
   "resources/js/admin/views/BinView.vue": {
-    "file": "assets/BinView-CTZbCJRz.js",
+    "file": "assets/BinView-DDxryuN-.js",
     "name": "BinView",
     "src": "resources/js/admin/views/BinView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js",
-      "_serverDataTable-DM4MKLza.js",
-      "_swal-CrKuX7dn.js"
+      "_apiHelpers-Cn0SikLq.js",
+      "_serverDataTable-CGULlAU8.js",
+      "_swal-BDMA6nmd.js",
+      "_pagination-cFowRE2w.js"
+    ]
+  },
+  "resources/js/admin/views/BulkStudentsView.vue": {
+    "file": "assets/BulkStudentsView-D4oz8myF.js",
+    "name": "BulkStudentsView",
+    "src": "resources/js/admin/views/BulkStudentsView.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/admin/main.js",
+      "_bootstrap.esm-D7Q7Nh7Y.js",
+      "_apiHelpers-Cn0SikLq.js",
+      "_swal-BDMA6nmd.js",
+      "_TablePager-hv4AH1Ub.js",
+      "_pagination-cFowRE2w.js",
+      "_indianMobile-D9s-dAq0.js"
     ]
   },
   "resources/js/admin/views/CertificatesView.vue": {
-    "file": "assets/CertificatesView-31s1ecwm.js",
+    "file": "assets/CertificatesView-CXCRhrCW.js",
     "name": "CertificatesView",
     "src": "resources/js/admin/views/CertificatesView.vue",
     "isDynamicEntry": true,
@@ -130,143 +151,113 @@
     ]
   },
   "resources/js/admin/views/CollegesView.vue": {
-    "file": "assets/CollegesView-Z5q9RFtS.js",
+    "file": "assets/CollegesView-3UkQxJok.js",
     "name": "CollegesView",
     "src": "resources/js/admin/views/CollegesView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js",
+      "_apiHelpers-Cn0SikLq.js",
       "_bootstrap.esm-D7Q7Nh7Y.js",
-      "_serverDataTable-DM4MKLza.js",
-      "_swal-CrKuX7dn.js"
+      "_serverDataTable-CGULlAU8.js",
+      "_swal-BDMA6nmd.js",
+      "_pagination-cFowRE2w.js"
     ]
   },
   "resources/js/admin/views/DashboardView.vue": {
-    "file": "assets/DashboardView-D5Ozsew7.js",
+    "file": "assets/DashboardView-DPaXl-39.js",
     "name": "DashboardView",
     "src": "resources/js/admin/views/DashboardView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js"
+      "_apiHelpers-Cn0SikLq.js"
     ]
   },
   "resources/js/admin/views/EntryView.vue": {
-    "file": "assets/EntryView-DbHNAHPv.js",
+    "file": "assets/EntryView-DIz7xw5B.js",
     "name": "EntryView",
     "src": "resources/js/admin/views/EntryView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js",
-      "_bootstrap.esm-D7Q7Nh7Y.js"
-    ]
-  },
-  "resources/js/admin/views/GroupCreateView.vue": {
-    "file": "assets/GroupCreateView-aPJjkj4R.js",
-    "name": "GroupCreateView",
-    "src": "resources/js/admin/views/GroupCreateView.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/admin/main.js"
-    ]
-  },
-  "resources/js/admin/views/GroupEditView.vue": {
-    "file": "assets/GroupEditView-CbMGME9_.js",
-    "name": "GroupEditView",
-    "src": "resources/js/admin/views/GroupEditView.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/admin/main.js",
-      "_useWhatsapp-C-zQNdyL.js",
-      "_swal-CrKuX7dn.js"
-    ]
-  },
-  "resources/js/admin/views/GroupsIndexView.vue": {
-    "file": "assets/GroupsIndexView-DNB0nXoD.js",
-    "name": "GroupsIndexView",
-    "src": "resources/js/admin/views/GroupsIndexView.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js"
+      "_apiHelpers-Cn0SikLq.js",
+      "_indianMobile-D9s-dAq0.js",
+      "_bootstrap.esm-D7Q7Nh7Y.js",
+      "_TablePager-hv4AH1Ub.js",
+      "_pagination-cFowRE2w.js"
     ]
   },
   "resources/js/admin/views/ImportLogsView.vue": {
-    "file": "assets/ImportLogsView-DrT6Hy77.js",
+    "file": "assets/ImportLogsView-CArL1Oq7.js",
     "name": "ImportLogsView",
     "src": "resources/js/admin/views/ImportLogsView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js"
+      "_apiHelpers-Cn0SikLq.js",
+      "_TablePager-hv4AH1Ub.js",
+      "_pagination-cFowRE2w.js"
     ]
   },
   "resources/js/admin/views/LoginView.vue": {
-    "file": "assets/LoginView-CQaWhWwz.js",
+    "file": "assets/LoginView-BJQhLp1v.js",
     "name": "LoginView",
     "src": "resources/js/admin/views/LoginView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js"
-    ]
-  },
-  "resources/js/admin/views/NotificationsView.vue": {
-    "file": "assets/NotificationsView-1mk2Yrm7.js",
-    "name": "NotificationsView",
-    "src": "resources/js/admin/views/NotificationsView.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/admin/main.js",
-      "_swal-CrKuX7dn.js"
+      "_apiHelpers-Cn0SikLq.js"
     ]
   },
   "resources/js/admin/views/RegisterHomeView.vue": {
-    "file": "assets/RegisterHomeView-ba_Iy8vu.js",
+    "file": "assets/RegisterHomeView-DskxK63d.js",
     "name": "RegisterHomeView",
     "src": "resources/js/admin/views/RegisterHomeView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_RegisterPageShell-CjeSDhKv.js"
+      "_RegisterPageShell-CVomaCdJ.js"
     ]
   },
   "resources/js/admin/views/RegisterView.vue": {
-    "file": "assets/RegisterView-DZ-YRikI.js",
+    "file": "assets/RegisterView-eOCnN_af.js",
     "name": "RegisterView",
     "src": "resources/js/admin/views/RegisterView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js",
-      "_RegisterPageShell-CjeSDhKv.js"
+      "_apiHelpers-Cn0SikLq.js",
+      "_RegisterPageShell-CVomaCdJ.js"
     ]
   },
   "resources/js/admin/views/ReportsView.vue": {
-    "file": "assets/ReportsView-CGYY_RHL.js",
+    "file": "assets/ReportsView-Bg_FGdlJ.js",
     "name": "ReportsView",
     "src": "resources/js/admin/views/ReportsView.vue",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/admin/main.js"
+      "resources/js/admin/main.js",
+      "_apiHelpers-Cn0SikLq.js",
+      "_pagination-cFowRE2w.js",
+      "_TablePager-hv4AH1Ub.js"
     ]
   },
   "resources/js/admin/views/RolesView.vue": {
-    "file": "assets/RolesView-IZe-jtdd.js",
+    "file": "assets/RolesView-Yyg7qiCb.js",
     "name": "RolesView",
     "src": "resources/js/admin/views/RolesView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js",
-      "_serverDataTable-DM4MKLza.js",
-      "_swal-CrKuX7dn.js"
+      "_apiHelpers-Cn0SikLq.js",
+      "_serverDataTable-CGULlAU8.js",
+      "_swal-BDMA6nmd.js",
+      "_pagination-cFowRE2w.js"
     ]
   },
   "resources/js/admin/views/SettingsView.vue": {
-    "file": "assets/SettingsView-B0bCB1L3.js",
+    "file": "assets/SettingsView-CQslyFFe.js",
     "name": "SettingsView",
     "src": "resources/js/admin/views/SettingsView.vue",
     "isDynamicEntry": true,
@@ -275,61 +266,52 @@
     ]
   },
   "resources/js/admin/views/StaffUsersView.vue": {
-    "file": "assets/StaffUsersView-B9kOJCQM.js",
+    "file": "assets/StaffUsersView-DZZhTUMe.js",
     "name": "StaffUsersView",
     "src": "resources/js/admin/views/StaffUsersView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js",
-      "_serverDataTable-DM4MKLza.js",
-      "_swal-CrKuX7dn.js"
-    ]
-  },
-  "resources/js/admin/views/StudentCreateView.vue": {
-    "file": "assets/StudentCreateView-CxOH0e5M.js",
-    "name": "StudentCreateView",
-    "src": "resources/js/admin/views/StudentCreateView.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js",
-      "_studentForm-DZN3otYq.js"
+      "_apiHelpers-Cn0SikLq.js",
+      "_serverDataTable-CGULlAU8.js",
+      "_swal-BDMA6nmd.js",
+      "_pagination-cFowRE2w.js"
     ]
   },
   "resources/js/admin/views/StudentEditView.vue": {
-    "file": "assets/StudentEditView-By8cKo5A.js",
+    "file": "assets/StudentEditView-BhtSYNyM.js",
     "name": "StudentEditView",
     "src": "resources/js/admin/views/StudentEditView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js",
-      "_studentForm-DZN3otYq.js",
-      "_swal-CrKuX7dn.js"
+      "_apiHelpers-Cn0SikLq.js",
+      "_swal-BDMA6nmd.js"
     ]
   },
   "resources/js/admin/views/StudentsIndexView.vue": {
-    "file": "assets/StudentsIndexView-B1PsI1Rr.js",
+    "file": "assets/StudentsIndexView-D24f5Drw.js",
     "name": "StudentsIndexView",
     "src": "resources/js/admin/views/StudentsIndexView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_serverDataTable-DM4MKLza.js",
-      "_swal-CrKuX7dn.js",
-      "_apiHelpers-BTSILepQ.js"
+      "_serverDataTable-CGULlAU8.js",
+      "_swal-BDMA6nmd.js",
+      "_apiHelpers-Cn0SikLq.js",
+      "_pagination-cFowRE2w.js"
     ]
   },
   "resources/js/admin/views/WhatsappView.vue": {
-    "file": "assets/WhatsappView-DCaGJnSe.js",
+    "file": "assets/WhatsappView-DP-IHp-y.js",
     "name": "WhatsappView",
     "src": "resources/js/admin/views/WhatsappView.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/admin/main.js",
-      "_apiHelpers-BTSILepQ.js",
-      "_useWhatsapp-C-zQNdyL.js"
+      "_apiHelpers-Cn0SikLq.js",
+      "_TablePager-hv4AH1Ub.js",
+      "_pagination-cFowRE2w.js"
     ]
   }
 }
