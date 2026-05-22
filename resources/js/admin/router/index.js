@@ -7,7 +7,7 @@ const useAdminBase = isAdminSpaPath()
 const adminBlankChildren = [
   { path: '', name: 'home', redirect: '/login' },
   { path: 'login', name: 'login', component: () => import('@/views/LoginView.vue') },
-  { path: 'register', name: 'register', component: () => import('@/views/RegisterHomeView.vue') },
+  { path: 'register', name: 'register', component: () => import('@/views/LandingView.vue') },
   {
     path: 'register/:slug',
     name: 'register-college',
@@ -16,8 +16,8 @@ const adminBlankChildren = [
 ]
 
 const publicBlankChildren = [
-  { path: '', name: 'register', component: () => import('@/views/RegisterHomeView.vue') },
-  { path: 'register', redirect: { name: 'register' } },
+  { path: '', name: 'landing', component: () => import('@/views/LandingView.vue') },
+  { path: 'register', redirect: { name: 'landing' } },
   {
     path: 'register/:slug',
     name: 'register-college',
@@ -43,7 +43,8 @@ const adminPanelChildren = [
   { path: 'import-logs', name: 'import-logs', component: () => import('@/views/ImportLogsView.vue') },
   { path: 'bulk-students', name: 'bulk-students', component: () => import('@/views/BulkStudentsView.vue') },
   { path: 'students', name: 'students', component: () => import('@/views/StudentsIndexView.vue') },
-  { path: 'students/:id', name: 'student-edit', component: () => import('@/views/StudentEditView.vue') },
+      { path: 'students/:id', name: 'student-edit', component: () => import('@/views/StudentEditView.vue') },
+      { path: 'payments', name: 'payments', component: () => import('@/views/PaymentsIndexView.vue') },
   { path: 'roles', name: 'roles', component: () => import('@/views/RolesView.vue') },
   { path: 'staff-users', name: 'staff-users', component: () => import('@/views/StaffUsersView.vue') },
   { path: 'bin', name: 'bin', component: () => import('@/views/BinView.vue') },

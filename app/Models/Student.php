@@ -100,6 +100,11 @@ class Student extends Model
         return $this->hasMany(AttendanceRecord::class);
     }
 
+    public function payment(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(StudentPayment::class);
+    }
+
     public function activeGroup(): ?InternshipGroup
     {
         return $this->groups()->where('internship_groups.status', 'active')->first();

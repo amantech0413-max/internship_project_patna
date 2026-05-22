@@ -15,6 +15,7 @@ const FALLBACK_ROUTE_PERMISSIONS = {
   'student-edit': 'student_view',
   'staff-users': 'staff_manage',
   bin: 'bin_manage',
+  payments: 'payment_view',
 }
 
 const FALLBACK_SUPER_ADMIN_ONLY = ['roles']
@@ -40,7 +41,13 @@ const FALLBACK_MENU = [
     title: 'Bulk Students',
     items: [{ to: '/bulk-students', route: 'bulk-students', label: 'Bulk Students', icon: 'bi-person-lines-fill', permission: 'bulk_student_view' }],
   },
-  { title: 'Students', items: [{ to: '/students', route: 'students', label: 'Students', icon: 'bi-people', permission: 'student_view' }] },
+  {
+    title: 'Students',
+    items: [
+      { to: '/students', route: 'students', label: 'Students', icon: 'bi-people', permission: 'student_view' },
+      { to: '/payments', route: 'payments', label: 'Payments', icon: 'bi-credit-card', permission: 'payment_view' },
+    ],
+  },
   {
     title: 'Internship (Full)',
     items: [

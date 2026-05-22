@@ -15,11 +15,14 @@ use App\Http\Controllers\Api\V1\PublicRegistrationController;
 use App\Http\Controllers\Api\V1\Admin\BinController;
 use App\Http\Controllers\Api\V1\Admin\BulkStudentController;
 use App\Http\Controllers\Api\V1\Admin\BulkStudentReportController;
+use App\Http\Controllers\Api\V1\Admin\SiteSettingController;
+use App\Http\Controllers\Api\V1\Admin\StudentPaymentController;
 use App\Http\Controllers\Api\V1\Staff\StaffStudentImportController;
 use App\Http\Controllers\Api\V1\StudentDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    Route::get('registration/settings', [PublicRegistrationController::class, 'settings']);
     Route::get('registration/colleges', [PublicRegistrationController::class, 'colleges']);
     Route::get('registration/colleges/{slug}', [PublicRegistrationController::class, 'collegeBySlug']);
 
@@ -162,6 +165,20 @@ Route::prefix('v1')->group(function () {
             Route::get('whatsapp/messages', [WhatsappMessageController::class, 'index']);
             Route::post('whatsapp/messages/retry-failed', [WhatsappMessageController::class, 'retryFailed']);
             Route::post('whatsapp/messages/{whatsappMessage}/resend', [WhatsappMessageController::class, 'resend']);
+
+            Route::middleware('permission:payment_view')->group(function () {
+                Route::get('payments', [StudentPaymentController::class, 'index']);
+                Route::get('payments/{payment}', [StudentPaymentController::class, 'show']);
+            });
+
+            Route::middleware('permission:payment_status')->group(function () {
+                Route::patch('payments/{payment}/status', [StudentPaymentController::class, 'updateStatus']);
+            });
+
+            Route::middleware('role:super_admin,admin')->group(function () {
+                Route::get('settings', [SiteSettingController::class, 'show']);
+                Route::match(['put', 'post'], 'settings', [SiteSettingController::class, 'update']);
+            });
         });
 
         Route::prefix('staff')->middleware(['role:super_admin,admin,college_coordinator', 'permission:staff_entry'])->group(function () {

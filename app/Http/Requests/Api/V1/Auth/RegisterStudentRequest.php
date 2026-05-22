@@ -23,10 +23,16 @@ class RegisterStudentRequest extends FormRequest
         if ($college) {
             $this->merge(['college_id' => $college->id]);
         }
+
+        $this->merge([
+            'payment_mode_offline' => $this->boolean('payment_mode_offline'),
+        ]);
     }
 
     public function rules(): array
     {
+        $offline = $this->boolean('payment_mode_offline');
+
         return [
             'college_slug' => [
                 'required',
@@ -43,6 +49,14 @@ class RegisterStudentRequest extends FormRequest
             'mobile' => ['required', 'digits:10'],
             'email' => ['nullable', 'email', 'max:255'],
             'internship_mode' => ['nullable', Rule::in(['online', 'offline'])],
+            'payment_mode_offline' => ['sometimes', 'boolean'],
+            'transaction_id' => [$offline ? 'nullable' : 'required', 'string', 'max:100'],
+            'payment_screenshot' => [
+                $offline ? 'nullable' : 'required',
+                'file',
+                'image',
+                'max:5120',
+            ],
         ];
     }
 
@@ -62,6 +76,9 @@ class RegisterStudentRequest extends FormRequest
             'mobile.required' => 'Mobile number is required.',
             'mobile.digits' => 'Mobile number must be exactly 10 digits.',
             'email.email' => 'Enter a valid email address.',
+            'transaction_id.required' => 'Transaction ID is required for online payment.',
+            'payment_screenshot.required' => 'Payment screenshot is required for online payment.',
+            'payment_screenshot.image' => 'Payment screenshot must be an image (JPG, PNG, etc.).',
         ];
     }
 }

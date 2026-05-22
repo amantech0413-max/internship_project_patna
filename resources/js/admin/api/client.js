@@ -80,8 +80,17 @@ export async function apiDownload(path, filename) {
 }
 
 export function getPublicApi() {
-  return axios.create({
+  const client = axios.create({
     baseURL: apiBase,
     headers: { Accept: 'application/json' },
   })
+  client.interceptors.request.use((config) => {
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type']
+    }
+    return config
+  })
+  client.interceptors.response.use((r) => r.data)
+
+  return client
 }

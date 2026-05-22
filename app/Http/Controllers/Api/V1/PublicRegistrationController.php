@@ -4,11 +4,20 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Resources\CollegeRegistrationResource;
 use App\Services\CollegeService;
+use App\Services\SiteSettingService;
 use Illuminate\Http\JsonResponse;
 
 class PublicRegistrationController extends Controller
 {
-    public function __construct(protected CollegeService $colleges) {}
+    public function __construct(
+        protected CollegeService $colleges,
+        protected SiteSettingService $settings
+    ) {}
+
+    public function settings(): JsonResponse
+    {
+        return $this->success($this->settings->publicPaymentDisplay());
+    }
 
     public function colleges(): JsonResponse
     {

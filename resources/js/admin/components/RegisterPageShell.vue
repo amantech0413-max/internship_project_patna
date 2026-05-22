@@ -3,10 +3,16 @@
     <header class="register-header">
       <div class="register-header-inner">
         <div class="register-brand">
-          <div class="register-logo">BL</div>
+          <img
+            v-if="branding.organization_logo_url"
+            :src="branding.organization_logo_url"
+            alt="Logo"
+            class="register-logo-img"
+          />
+          <div v-else class="register-logo">BL</div>
           <div>
-            <div class="register-brand-name">M/s Bhagya Laxmi</div>
-            <div class="register-brand-addr">A-1, Patliputra Industrial Area, Patna-800013, Bihar, India</div>
+            <div class="register-brand-name">{{ branding.organization_name || 'M/s Bhagya Laxmi' }}</div>
+            <div class="register-brand-addr">{{ branding.organization_address || '' }}</div>
           </div>
         </div>
         <div class="register-badge">
@@ -19,20 +25,22 @@
       </div>
     </header>
 
-    <section class="register-hero">
-      <div class="register-hero-inner">
-        <span class="register-hero-tag"><i class="bi bi-mortarboard-fill" /> Welcome to</span>
-        <h1>{{ heroTitle }}</h1>
-        <p v-if="collegeShortName" class="register-hero-college">{{ collegeShortName }}</p>
-        <p class="register-hero-desc">{{ heroDescription }}</p>
+    <section class="register-hero" :class="{ 'landing-hero': isLanding }">
+      <div class="register-hero-inner" :class="{ 'landing-hero-inner': isLanding }">
+        <slot name="hero">
+          <span class="register-hero-tag"><i class="bi bi-mortarboard-fill" /> Welcome to</span>
+          <h1>{{ heroTitle }}</h1>
+          <p v-if="collegeShortName" class="register-hero-college">{{ collegeShortName }}</p>
+          <p class="register-hero-desc">{{ heroDescription }}</p>
+        </slot>
       </div>
     </section>
 
-    <div class="register-body-wrap">
+    <div class="register-body-wrap" :class="{ 'landing-body-wrap': isLanding }">
       <slot />
     </div>
 
-    <section class="register-features">
+    <section v-if="showFeatures" class="register-features">
       <div class="register-feature">
         <div class="register-feature-icon blue"><i class="bi bi-briefcase-fill" /></div>
         <h3>Professional Experience</h3>
@@ -50,12 +58,12 @@
       </div>
     </section>
 
-    <footer class="register-footer">
+    <footer class="register-footer landing-footer">
       <div class="register-footer-inner">
         <span class="register-footer-trust">
-          <i class="bi bi-shield-check" /> Secure | Trusted | Professional
+          <i class="bi bi-shield-check" /> Secure • Reliable • Future Ready
         </span>
-        <span>© {{ year }} M/s Bhagya Laxmi. All Rights Reserved.</span>
+        <span>© {{ year }} M/s Bhagya Laxmi. All rights reserved.</span>
       </div>
     </footer>
   </div>
@@ -65,12 +73,18 @@
 import '../../../css/register.css'
 
 defineProps({
-  heroTitle: { type: String, default: 'Internship Jun 2026' },
+  branding: {
+    type: Object,
+    default: () => ({}),
+  },
+  heroTitle: { type: String, default: 'Internship Jun 2026 Registration' },
   heroDescription: {
     type: String,
-    default: 'Begin your professional journey with us. Fill out the form to apply for the internship program.',
+    default: 'Begin your professional journey with us. Fill out the form carefully to apply for the internship program.',
   },
   collegeShortName: { type: String, default: '' },
+  isLanding: { type: Boolean, default: false },
+  showFeatures: { type: Boolean, default: true },
 })
 
 const year = new Date().getFullYear()

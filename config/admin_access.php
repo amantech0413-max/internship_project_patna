@@ -12,6 +12,7 @@ return [
         'student-edit' => StaffPermissions::STUDENT_VIEW,
         'staff-users' => StaffPermissions::STAFF_MANAGE,
         'bin' => StaffPermissions::BIN_MANAGE,
+        'payments' => StaffPermissions::PAYMENT_VIEW,
     ],
 
     'super_admin_only_routes' => [
@@ -50,6 +51,7 @@ return [
             'title' => 'Students',
             'items' => [
                 ['to' => '/students', 'route' => 'students', 'label' => 'Students', 'icon' => 'bi-people', 'permission' => StaffPermissions::STUDENT_VIEW],
+                ['to' => '/payments', 'route' => 'payments', 'label' => 'Payments', 'icon' => 'bi-credit-card', 'permission' => StaffPermissions::PAYMENT_VIEW],
             ],
         ],
         [

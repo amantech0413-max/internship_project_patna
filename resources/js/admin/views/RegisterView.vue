@@ -1,8 +1,10 @@
 <template>
   <RegisterPageShell
+    :branding="siteSettings"
     :college-short-name="college?.short_name"
     hero-title="Internship Jun 2026 Registration"
     hero-description="Begin your professional journey with us. Fill out the form carefully to apply for the internship program."
+    :show-features="true"
   >
     <div v-if="success" class="register-card">
       <div class="register-success">
@@ -129,6 +131,106 @@
           </div>
         </div>
 
+        <div class="reg-payment-section mt-4 pt-4 border-top">
+          <h3 class="reg-payment-title"><i class="bi bi-wallet2" />Payment</h3>
+
+          <div class="reg-payment-toolbar">
+            <div v-if="feeAmount > 0" class="reg-fee-badge">
+              <span class="reg-fee-label">Registration Fee</span>
+              <strong class="reg-fee-amount">{{ formatFeeDisplay(feeAmount) }}</strong>
+            </div>
+            <div class="form-check reg-offline-check mb-0">
+              <input
+                id="paymentOffline"
+                v-model="form.payment_mode_offline"
+                class="form-check-input"
+                type="checkbox"
+                @change="onOfflineToggle"
+              />
+              <label class="form-check-label" for="paymentOffline">Payment mode offline</label>
+            </div>
+          </div>
+
+          <div v-if="!form.payment_mode_offline" class="reg-payment-online">
+            <div
+              v-if="siteSettings.upi_qr_url || siteSettings.upi_id"
+              class="reg-payment-scan-card"
+            >
+              <p class="reg-payment-scan-heading">Scan &amp; pay via UPI</p>
+              <div v-if="siteSettings.upi_qr_url && !qrImageFailed" class="reg-qr-card">
+                <div class="reg-qr-hover">
+                  <img
+                    :src="siteSettings.upi_qr_url"
+                    alt="UPI QR Code"
+                    class="reg-qr-img"
+                    @error="qrImageFailed = true"
+                  />
+                  <div class="reg-qr-overlay">
+                    <button type="button" class="btn btn-light btn-sm" @click="downloadQr">
+                      <i class="bi bi-download me-1" />Download QR
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p v-else-if="siteSettings.upi_qr_url && qrImageFailed" class="reg-qr-missing small text-muted mb-2">
+                QR image could not be loaded. Please use UPI ID below or contact support.
+              </p>
+
+              <div v-if="siteSettings.upi_id" class="reg-upi-card">
+                <span class="reg-upi-label">UPI ID</span>
+                <div class="reg-upi-value-row">
+                  <code class="reg-upi-id">{{ siteSettings.upi_id }}</code>
+                  <button type="button" class="btn btn-sm btn-outline-primary reg-upi-copy" title="Copy UPI ID" @click="copyUpi">
+                    <i class="bi bi-clipboard me-1" />Copy
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="reg-payment-fields">
+              <p class="reg-payment-fields-heading">After payment, submit details</p>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="reg-field" :class="{ 'has-error': errors.transaction_id }">
+                    <label>Transaction ID *</label>
+                    <div class="reg-input-wrap">
+                      <i class="bi bi-receipt reg-input-icon" />
+                      <input
+                        v-model="form.transaction_id"
+                        class="reg-input"
+                        placeholder="Enter UPI / bank transaction ID"
+                        required
+                      />
+                    </div>
+                    <div v-if="errors.transaction_id" class="reg-field-error">{{ errors.transaction_id }}</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="reg-field" :class="{ 'has-error': errors.payment_screenshot }">
+                    <label>Payment Screenshot *</label>
+                    <input
+                      type="file"
+                      class="reg-file-input"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      required
+                      @change="onScreenshotChange"
+                    />
+                    <div v-if="screenshotPreview" class="reg-screenshot-preview-wrap">
+                      <img :src="screenshotPreview" alt="Payment screenshot preview" class="reg-screenshot-preview" />
+                    </div>
+                    <div v-if="errors.payment_screenshot" class="reg-field-error">{{ errors.payment_screenshot }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p v-else class="reg-offline-note mb-0">
+            <i class="bi bi-info-circle me-1" />
+            Offline payment selected. Your payment will remain <strong>Pending</strong> until verified by admin.
+          </p>
+        </div>
+
         <p v-if="error" class="alert alert-danger mt-3 mb-0 small">{{ error }}</p>
         <p v-if="fieldErrors" class="alert alert-danger mt-3 mb-0 small">{{ fieldErrors }}</p>
 
@@ -142,34 +244,63 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPublicApi } from '@/api/client'
 import { parseApiError } from '@/utils/apiHelpers'
+import { fetchPublicSiteSettings } from '@/composables/useSiteSettings'
+import { useToastStore } from '@/stores/toast'
 import RegisterPageShell from '@/components/RegisterPageShell.vue'
 
 const route = useRoute()
 const router = useRouter()
 const http = getPublicApi()
+const toast = useToastStore()
 
+const siteSettings = ref({})
 const slug = computed(() => String(route.params.slug || ''))
 const college = ref(null)
+
+const feeAmount = computed(() => Number(siteSettings.value.registration_fee_amount || 0))
+const qrImageFailed = ref(false)
+
+const formatFeeDisplay = (n) => {
+  const val = Math.max(0, Number(n) || 0)
+  const text =
+    val === 0
+      ? '0'
+      : Number.isInteger(val)
+        ? String(Math.round(val))
+        : val.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 0 })
+  return `₹ ${text} /-`
+}
+
+onMounted(async () => {
+  siteSettings.value = await fetchPublicSiteSettings()
+})
+
+watch(
+  () => siteSettings.value.upi_qr_url,
+  () => {
+    qrImageFailed.value = false
+  }
+)
 
 const loadCollege = async (s) => {
   if (!s) {
     college.value = null
-    router.replace({ name: 'register' })
+    router.replace({ name: 'landing' })
     return
   }
   try {
     const res = await http.get(`/registration/colleges/${encodeURIComponent(s)}`)
-    college.value = res.data?.data || null
+    college.value = res.data || null
     if (!college.value) {
-      router.replace({ name: 'register' })
+      router.replace({ name: 'landing' })
     }
   } catch {
     college.value = null
-    router.replace({ name: 'register' })
+    router.replace({ name: 'landing' })
   }
 }
 
@@ -182,6 +313,8 @@ const success = ref(false)
 const successMessage = ref('')
 const registeredStudent = ref(null)
 const errors = reactive({})
+const screenshotFile = ref(null)
+const screenshotPreview = ref('')
 
 const initialForm = () => ({
   registration_no: '',
@@ -192,9 +325,56 @@ const initialForm = () => ({
   subject: '',
   mobile: '',
   email: '',
+  payment_mode_offline: false,
+  transaction_id: '',
 })
 
 const form = reactive(initialForm())
+
+const onOfflineToggle = () => {
+  if (form.payment_mode_offline) {
+    form.transaction_id = ''
+    screenshotFile.value = null
+    screenshotPreview.value = ''
+    delete errors.transaction_id
+    delete errors.payment_screenshot
+  }
+}
+
+const onScreenshotChange = (e) => {
+  const file = e.target.files?.[0]
+  screenshotFile.value = file || null
+  if (screenshotPreview.value) URL.revokeObjectURL(screenshotPreview.value)
+  screenshotPreview.value = file ? URL.createObjectURL(file) : ''
+  delete errors.payment_screenshot
+}
+
+const copyUpi = async () => {
+  const id = siteSettings.value.upi_id
+  if (!id) return
+  try {
+    await navigator.clipboard.writeText(id)
+    toast.show('UPI ID copied to clipboard.', 'success')
+  } catch {
+    toast.show('Could not copy. Please copy manually.', 'danger')
+  }
+}
+
+const downloadQr = async () => {
+  const url = siteSettings.value.upi_qr_url
+  if (!url) return
+  try {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'upi-qr-code.png'
+    a.click()
+    URL.revokeObjectURL(a.href)
+  } catch {
+    window.open(url, '_blank')
+  }
+}
 
 const validateClient = () => {
   Object.keys(errors).forEach((k) => delete errors[k])
@@ -218,6 +398,14 @@ const validateClient = () => {
   if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
     errors.email = 'Enter a valid email address.'
   }
+  if (!form.payment_mode_offline) {
+    if (!form.transaction_id.trim()) {
+      errors.transaction_id = 'Transaction ID is required for online payment.'
+    }
+    if (!screenshotFile.value) {
+      errors.payment_screenshot = 'Payment screenshot is required for online payment.'
+    }
+  }
   return Object.keys(errors).length === 0
 }
 
@@ -229,20 +417,23 @@ const submit = async () => {
 
   loading.value = true
   try {
-    const payload = {
-      college_slug: slug.value,
-      registration_no: form.registration_no.trim(),
-      name: form.name.trim(),
-      father_name: form.father_name.trim(),
-      university_roll_no: form.university_roll_no.trim(),
-      college_roll_no: form.college_roll_no.trim(),
-      subject: form.subject.trim(),
-      mobile: form.mobile.replace(/\D/g, ''),
+    const fd = new FormData()
+    fd.append('college_slug', slug.value)
+    fd.append('registration_no', form.registration_no.trim())
+    fd.append('name', form.name.trim())
+    fd.append('father_name', form.father_name.trim())
+    fd.append('university_roll_no', form.university_roll_no.trim())
+    fd.append('college_roll_no', form.college_roll_no.trim())
+    fd.append('subject', form.subject.trim())
+    fd.append('mobile', form.mobile.replace(/\D/g, ''))
+    if (form.email.trim()) fd.append('email', form.email.trim())
+    fd.append('payment_mode_offline', form.payment_mode_offline ? '1' : '0')
+    if (!form.payment_mode_offline) {
+      fd.append('transaction_id', form.transaction_id.trim())
+      if (screenshotFile.value) fd.append('payment_screenshot', screenshotFile.value)
     }
-    if (form.email.trim()) payload.email = form.email.trim()
 
-    const res = await http.post('/auth/register', payload)
-    const body = res.data
+    const body = await http.post('/auth/register', fd)
     success.value = true
     successMessage.value = body.message || 'Submitted successfully.'
     registeredStudent.value = body.data
@@ -264,6 +455,9 @@ const submit = async () => {
 
 const resetForm = () => {
   Object.assign(form, initialForm())
+  screenshotFile.value = null
+  if (screenshotPreview.value) URL.revokeObjectURL(screenshotPreview.value)
+  screenshotPreview.value = ''
   success.value = false
   registeredStudent.value = null
   error.value = ''

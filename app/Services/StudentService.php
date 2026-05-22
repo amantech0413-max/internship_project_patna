@@ -13,15 +13,28 @@ use Illuminate\Support\Facades\DB;
 class StudentService
 {
     public function __construct(
-        protected StudentRepositoryInterface $students
+        protected StudentRepositoryInterface $students,
+        protected StudentPaymentService $payments
     ) {}
 
     /** Public self-registration — no login, no added_by; documents optional via admin later. */
-    public function register(array $data): Student
+    public function register(array $data, ?UploadedFile $paymentScreenshot = null): Student
     {
         $data['internship_mode'] = $data['internship_mode'] ?? InternshipMode::Online->value;
+        $offline = ! empty($data['payment_mode_offline']);
 
-        return $this->createStudentRecord($data, null, null, StudentStatus::Pending, null);
+        return DB::transaction(function () use ($data, $paymentScreenshot, $offline) {
+            $student = $this->createStudentRecord($data, null, null, StudentStatus::Pending, null);
+
+            $this->payments->createForRegistration(
+                $student,
+                $offline,
+                $offline ? null : ($data['transaction_id'] ?? null),
+                $offline ? null : $paymentScreenshot
+            );
+
+            return $student->fresh(['college', 'payment']);
+        });
     }
 
     /** Admin/staff full student create — sets added_by (created_by). */

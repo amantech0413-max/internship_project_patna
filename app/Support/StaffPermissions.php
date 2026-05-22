@@ -36,6 +36,10 @@ class StaffPermissions
 
     public const BIN_DELETE_PERMANENT = 'bin_delete_permanent';
 
+    public const PAYMENT_VIEW = 'payment_view';
+
+    public const PAYMENT_STATUS = 'payment_status';
+
     /** @return list<string> */
     public static function keys(): array
     {
@@ -54,6 +58,8 @@ class StaffPermissions
             self::STAFF_MANAGE,
             self::BIN_MANAGE,
             self::BIN_DELETE_PERMANENT,
+            self::PAYMENT_VIEW,
+            self::PAYMENT_STATUS,
         ];
     }
 
@@ -116,6 +122,8 @@ class StaffPermissions
             self::STAFF_MANAGE => 'Manage Staff Users',
             self::BIN_MANAGE => 'Recycle Bin — Restore Items',
             self::BIN_DELETE_PERMANENT => 'Recycle Bin — Delete Permanently',
+            self::PAYMENT_VIEW => 'View Payments',
+            self::PAYMENT_STATUS => 'Update Payment Status',
         ];
     }
 
