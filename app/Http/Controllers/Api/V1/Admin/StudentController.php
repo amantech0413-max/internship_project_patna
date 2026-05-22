@@ -25,7 +25,7 @@ class StudentController extends Controller
     public function index(Request $request): JsonResponse
     {
         $paginator = $this->students->paginate($request->only([
-            'search', 'mobile', 'college_name', 'semester', 'internship_mode', 'status',
+            'search', 'mobile', 'college_id', 'semester', 'internship_mode', 'status',
             'sort_by', 'sort_dir',
         ]), (int) $request->get('per_page', 10));
 
@@ -134,7 +134,7 @@ class StudentController extends Controller
                     $student->student_code,
                     $student->student_name,
                     $student->mobile_number,
-                    $student->college_name,
+                    $student->college?->college_name,
                     $student->semester,
                     $student->internship_mode?->value,
                     $student->status?->value,

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Imports\StudentImport;
 use App\Models\ExcelImportLog;
 use App\Repositories\Contracts\StaffStudentRepositoryInterface;
+use App\Support\IndianMobile;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -32,7 +33,7 @@ class StaffStudentImportService
             $rows[] = [
                 'row' => $item['row'],
                 'student_name' => $item['student_name'],
-                'mobile_number' => $item['mobile_number'],
+                'mobile_number' => $validation['mobile'] ?? $item['mobile_number'],
                 'valid' => $validation['valid'],
                 'error' => $validation['error'] ?? null,
             ];
@@ -65,15 +66,15 @@ class StaffStudentImportService
 
         foreach ($rows as $index => $row) {
             $studentName = trim((string) ($row['student_name'] ?? ''));
-            $mobile = preg_replace('/\D/', '', (string) ($row['mobile_number'] ?? ''));
+            $mobileRaw = (string) ($row['mobile_number'] ?? '');
 
-            if ($studentName === '' && $mobile === '') {
+            if ($studentName === '' && trim($mobileRaw) === '') {
                 $skipped++;
 
                 continue;
             }
 
-            $validation = $this->validateRow($studentName, $mobile);
+            $validation = $this->validateRow($studentName, $mobileRaw);
             if (! $validation['valid']) {
                 $failed++;
                 $errors[] = ['row' => $row['row'] ?? $index + 2, 'message' => $validation['error']];
@@ -85,7 +86,7 @@ class StaffStudentImportService
                 $this->students->create([
                     'college_id' => $collegeId,
                     'student_name' => $studentName,
-                    'mobile_number' => $mobile,
+                    'mobile_number' => $validation['mobile'],
                     'created_by' => $importedBy,
                     'status' => 'approved',
                 ]);
@@ -125,9 +126,9 @@ class StaffStudentImportService
         foreach ($rows as $row) {
             $line++;
             $name = trim((string) ($row['student_name'] ?? $row['student name'] ?? $row[0] ?? ''));
-            $mobile = preg_replace('/\D/', '', (string) ($row['mobile_number'] ?? $row['mobile number'] ?? $row[1] ?? ''));
+            $mobile = (string) ($row['mobile_number'] ?? $row['mobile number'] ?? $row[1] ?? '');
 
-            if ($name === '' && $mobile === '') {
+            if ($name === '' && trim($mobile) === '') {
                 continue;
             }
 
@@ -142,19 +143,24 @@ class StaffStudentImportService
     }
 
     /**
-     * @return array{valid: bool, error?: string}
+     * @return array{valid: bool, mobile?: string, error?: string}
      */
-    protected function validateRow(string $studentName, string $mobile): array
+    protected function validateRow(string $studentName, string $mobileRaw): array
     {
         if ($studentName === '') {
             return ['valid' => false, 'error' => 'Student name is required.'];
         }
 
-        if (! preg_match('/^\d{10}$/', $mobile)) {
-            return ['valid' => false, 'error' => 'Mobile must be 10 digits.'];
+        $mobile = IndianMobile::normalize($mobileRaw);
+
+        if ($mobile === null) {
+            return [
+                'valid' => false,
+                'error' => 'Invalid mobile. Use 10 digits, or 91/+91 prefix (last 10 digits will be used).',
+            ];
         }
 
-        return ['valid' => true];
+        return ['valid' => true, 'mobile' => $mobile];
     }
 
     protected function cacheKey(string $token): string

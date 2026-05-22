@@ -149,7 +149,7 @@ class BinService
             'id' => $model->id,
             'type' => 'student',
             'title' => $model->student_name,
-            'subtitle' => ($model->student_code ?? '').' · '.($model->college_name ?? $model->college?->college_name ?? '—'),
+            'subtitle' => ($model->student_code ?? '').' · '.($model->college?->college_name ?? '—'),
             'deleted_at' => $model->deleted_at?->toIso8601String(),
         ];
     }

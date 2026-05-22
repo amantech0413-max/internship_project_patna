@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ExcelImportLog;
 use App\Repositories\Contracts\StaffStudentRepositoryInterface;
+use App\Support\IndianMobile;
 use Illuminate\Http\UploadedFile;
 use ZipArchive;
 
@@ -28,7 +29,7 @@ class ExcelImportService
             $rows[] = [
                 'row' => $item['row'],
                 'student_name' => $item['student_name'],
-                'mobile_number' => $item['mobile_number'],
+                'mobile_number' => $validation['mobile'] ?? $item['mobile_number'],
                 'valid' => $validation['valid'],
                 'error' => $validation['error'] ?? null,
             ];
@@ -53,15 +54,15 @@ class ExcelImportService
 
         foreach ($rows as $index => $row) {
             $studentName = trim((string) ($row['student_name'] ?? ''));
-            $mobile = preg_replace('/\D/', '', (string) ($row['mobile_number'] ?? ''));
+            $mobileRaw = (string) ($row['mobile_number'] ?? '');
 
-            if ($studentName === '' && $mobile === '') {
+            if ($studentName === '' && trim($mobileRaw) === '') {
                 $skipped++;
 
                 continue;
             }
 
-            $validation = $this->validateRow($studentName, $mobile);
+            $validation = $this->validateRow($studentName, $mobileRaw);
             if (! $validation['valid']) {
                 $failed++;
                 $errors[] = ['row' => $index + 2, 'message' => $validation['error']];
@@ -73,7 +74,7 @@ class ExcelImportService
                 $this->students->create([
                     'college_id' => $collegeId,
                     'student_name' => $studentName,
-                    'mobile_number' => $mobile,
+                    'mobile_number' => $validation['mobile'],
                     'created_by' => $importedBy,
                     'status' => 'approved',
                 ]);
@@ -143,7 +144,7 @@ class ExcelImportService
             $rows[] = [
                 'row' => $line,
                 'student_name' => trim((string) ($data[0] ?? '')),
-                'mobile_number' => preg_replace('/\D/', '', (string) ($data[1] ?? '')),
+                'mobile_number' => (string) ($data[1] ?? ''),
             ];
         }
 
@@ -207,9 +208,9 @@ class ExcelImportService
             }
 
             $name = $cells['A'] ?? '';
-            $mobile = preg_replace('/\D/', '', $cells['B'] ?? '');
+            $mobile = $cells['B'] ?? '';
 
-            if ($line === 1 && $this->isHeaderRow([$name, $mobile])) {
+            if ($line === 1 && $this->isHeaderRow([$name, IndianMobile::normalize($mobile) ?? $mobile])) {
                 continue;
             }
 
@@ -235,18 +236,23 @@ class ExcelImportService
     }
 
     /**
-     * @return array{valid: bool, error?: string}
+     * @return array{valid: bool, mobile?: string, error?: string}
      */
-    protected function validateRow(string $studentName, string $mobile): array
+    protected function validateRow(string $studentName, string $mobileRaw): array
     {
         if ($studentName === '') {
             return ['valid' => false, 'error' => 'Student name is required.'];
         }
 
-        if (! preg_match('/^\d{10}$/', $mobile)) {
-            return ['valid' => false, 'error' => 'Mobile must be 10 digits.'];
+        $mobile = IndianMobile::normalize($mobileRaw);
+
+        if ($mobile === null) {
+            return [
+                'valid' => false,
+                'error' => 'Invalid mobile. Use 10 digits, or 91/+91 prefix (last 10 digits will be used).',
+            ];
         }
 
-        return ['valid' => true];
+        return ['valid' => true, 'mobile' => $mobile];
     }
 }

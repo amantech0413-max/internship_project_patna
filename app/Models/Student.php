@@ -23,7 +23,6 @@ class Student extends Model
         'father_name',
         'university_roll_no',
         'college_roll_no',
-        'college_name',
         'subject',
         'semester',
         'mobile_number',

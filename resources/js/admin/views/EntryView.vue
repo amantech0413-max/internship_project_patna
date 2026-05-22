@@ -205,6 +205,7 @@ import { useAuthStore } from '@/stores/auth'
 import { apiFetch, apiForm, apiDownload, getPublicApi } from '@/api/client'
 import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
 import { useToastStore } from '@/stores/toast'
+import { normalizeIndianMobile } from '../utils/indianMobile'
 import { Modal } from 'bootstrap'
 
 const auth = useAuthStore()
@@ -260,11 +261,13 @@ const validateStep2 = () => {
   } else {
     errors.student_name = ''
   }
-  const mobile = form.mobile_number.replace(/\D/g, '')
-  if (!/^\d{10}$/.test(mobile)) {
-    errors.mobile_number = 'Mobile must be exactly 10 digits.'
+  const mobile = normalizeIndianMobile(form.mobile_number)
+  if (!mobile) {
+    errors.mobile_number =
+      'Invalid mobile. Use 10 digits, or 91/+91 prefix (last 10 digits will be used).'
     ok = false
   } else {
+    form.mobile_number = mobile
     errors.mobile_number = ''
   }
   if (!form.college_id) {
@@ -288,7 +291,7 @@ const saveEntry = async () => {
       body: {
         college_id: Number(form.college_id),
         student_name: form.student_name.trim(),
-        mobile_number: form.mobile_number.replace(/\D/g, ''),
+        mobile_number: normalizeIndianMobile(form.mobile_number) ?? form.mobile_number,
       },
     })
     useToastStore().show('Student entry saved. Added by: ' + staffName.value, 'success')

@@ -36,7 +36,7 @@ class StudentRepository implements StudentRepositoryInterface
                 $q->where('student_name', 'like', "%{$search}%")
                     ->orWhere('student_code', 'like', "%{$search}%")
                     ->orWhere('mobile_number', 'like', "%{$search}%")
-                    ->orWhere('college_name', 'like', "%{$search}%");
+                    ->orWhereHas('college', fn ($c) => $c->where('college_name', 'like', "%{$search}%"));
             });
         }
 
@@ -44,8 +44,8 @@ class StudentRepository implements StudentRepositoryInterface
             $query->where('mobile_number', $filters['mobile']);
         }
 
-        if (! empty($filters['college_name'])) {
-            $query->where('college_name', $filters['college_name']);
+        if (! empty($filters['college_id'])) {
+            $query->where('college_id', $filters['college_id']);
         }
 
         if (! empty($filters['semester'])) {
@@ -60,17 +60,25 @@ class StudentRepository implements StudentRepositoryInterface
             $query->where('status', $filters['status']);
         }
 
-        $this->applyListSorting($query, $filters, [
-            'student_code',
-            'student_name',
-            'mobile_number',
-            'college_name',
-            'internship_mode',
-            'status',
-            'registration_no',
-            'created_by',
-            'created_at',
-        ]);
+        $sortBy = $filters['sort_by'] ?? 'created_at';
+        $sortDir = strtolower((string) ($filters['sort_dir'] ?? 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sortBy === 'college_name') {
+            $query->leftJoin('colleges', 'colleges.id', '=', 'students.college_id')
+                ->select('students.*')
+                ->orderBy('colleges.college_name', $sortDir);
+        } else {
+            $this->applyListSorting($query, $filters, [
+                'student_code',
+                'student_name',
+                'mobile_number',
+                'internship_mode',
+                'status',
+                'registration_no',
+                'created_by',
+                'created_at',
+            ]);
+        }
 
         return $query->paginate($perPage);
     }

@@ -21,7 +21,7 @@
         and student code is <strong>{{ $student->student_code }}</strong>.
     </p>
     <p>Mode: {{ ucfirst($student->internship_mode?->value ?? 'online') }}</p>
-    <p>College: {{ $student->college_name }}</p>
+    <p>College: {{ $student->college?->college_name ?? '—' }}</p>
     <p>We look forward to your contribution.</p>
     <br>
     <p>Authorized Signatory<br>M/s Bhagya Laxmi</p>

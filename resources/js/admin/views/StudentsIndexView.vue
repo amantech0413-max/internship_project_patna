@@ -12,9 +12,6 @@
         >
           <i class="bi bi-download me-1" />{{ exporting ? '...' : 'Export CSV' }}
         </button>
-        <router-link v-if="canCreate" to="/students/create" class="btn btn-primary btn-sm">
-          <i class="bi bi-plus-lg me-1" /> Add Full Student
-        </router-link>
       </div>
     </div>
 
@@ -116,7 +113,6 @@ const exporting = ref(false)
 const tableRef = ref(null)
 let dt = null
 
-const canCreate = computed(() => auth.can('student_create'))
 const canEdit = computed(() => auth.can('student_edit'))
 const canApprove = computed(() => auth.can('student_approve'))
 const canExport = computed(() => auth.can('student_view'))
@@ -214,7 +210,7 @@ const initTable = () => {
       },
       {
         data: 'college_name',
-        render: (_d, _t, row) => row.college_name || row.college?.college_name || '—',
+        render: (_d, _t, row) => row.college_name ?? row.college?.college_name ?? '—',
       },
       { data: 'internship_mode', defaultContent: '—' },
       {

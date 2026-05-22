@@ -96,7 +96,6 @@ class DemoDatabaseSeeder extends Seeder
                 'father_name' => 'Father '.($i + 1),
                 'college_roll_no' => 'CR'.str_pad((string) ($i + 1), 3, '0', STR_PAD_LEFT),
                 'university_roll_no' => 'UR'.str_pad((string) ($i + 1), 3, '0', STR_PAD_LEFT),
-                'college_name' => $college->college_name,
                 'subject' => 'Computer Science',
                 'mobile_number' => '98'.str_pad((string) (10000000 + $i), 8, '0', STR_PAD_LEFT),
                 'email' => $i % 3 === 0 ? "student{$i}@demo.local" : null,

@@ -22,7 +22,6 @@ class UpdateStudentRequest extends FormRequest
             'father_name' => ['nullable', 'string', 'max:255'],
             'university_roll_no' => ['nullable', 'string', 'max:50'],
             'college_roll_no' => ['nullable', 'string', 'max:50'],
-            'college_name' => ['nullable', 'string', 'max:255'],
             'subject' => ['nullable', 'string', 'max:100'],
             'semester' => ['nullable', 'string', 'max:20'],
             'mobile' => ['sometimes', 'digits:10'],

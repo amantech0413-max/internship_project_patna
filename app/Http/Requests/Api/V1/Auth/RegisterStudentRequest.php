@@ -21,10 +21,7 @@ class RegisterStudentRequest extends FormRequest
             : null;
 
         if ($college) {
-            $this->merge([
-                'college_name' => $college->college_name,
-                'college_id' => $college->id,
-            ]);
+            $this->merge(['college_id' => $college->id]);
         }
     }
 
@@ -41,8 +38,7 @@ class RegisterStudentRequest extends FormRequest
             'father_name' => ['required', 'string', 'max:255'],
             'university_roll_no' => ['required', 'string', 'max:50'],
             'college_roll_no' => ['required', 'string', 'max:50'],
-            'college_name' => ['required', 'string', 'max:255'],
-            'college_id' => ['nullable', 'integer', 'exists:colleges,id'],
+            'college_id' => ['required', 'integer', 'exists:colleges,id'],
             'subject' => ['required', 'string', 'max:100'],
             'mobile' => ['required', 'digits:10'],
             'email' => ['nullable', 'email', 'max:255'],
@@ -61,7 +57,7 @@ class RegisterStudentRequest extends FormRequest
             'father_name.required' => "Father's name is required.",
             'university_roll_no.required' => 'University roll number is required.',
             'college_roll_no.required' => 'College roll number is required.',
-            'college_name.required' => 'College name is required.',
+            'college_id.required' => 'College is required.',
             'subject.required' => 'Subject is required.',
             'mobile.required' => 'Mobile number is required.',
             'mobile.digits' => 'Mobile number must be exactly 10 digits.',

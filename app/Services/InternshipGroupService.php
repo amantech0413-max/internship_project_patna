@@ -52,7 +52,7 @@ class InternshipGroupService
         }
 
         if ($group->college_name) {
-            $query->where('college_name', $group->college_name);
+            $query->whereHas('college', fn ($c) => $c->where('college_name', $group->college_name));
         }
 
         if ($group->internship_mode) {

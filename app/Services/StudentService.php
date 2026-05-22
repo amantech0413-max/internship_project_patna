@@ -72,7 +72,6 @@ class StudentService
                 'father_name' => $data['father_name'] ?? null,
                 'university_roll_no' => $data['university_roll_no'] ?? null,
                 'college_roll_no' => $data['college_roll_no'] ?? null,
-                'college_name' => $data['college_name'] ?? null,
                 'subject' => $data['subject'] ?? null,
                 'semester' => $data['semester'] ?? null,
                 'mobile_number' => $data['mobile'] ?? $data['mobile_number'],
@@ -201,11 +200,19 @@ class StudentService
             'father_name',
             'university_roll_no',
             'college_roll_no',
-            'college_name',
+            'college_id',
             'subject',
         ];
 
         foreach ($required as $field) {
+            if ($field === 'college_id') {
+                if (empty($data['college_id'])) {
+                    return false;
+                }
+
+                continue;
+            }
+
             if (empty($data[$field])) {
                 return false;
             }

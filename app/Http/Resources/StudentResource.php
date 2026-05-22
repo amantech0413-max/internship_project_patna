@@ -20,7 +20,7 @@ class StudentResource extends JsonResource
             'university_roll_no' => $this->university_roll_no,
             'college_roll_no' => $this->college_roll_no,
             'college_id' => $this->college_id,
-            'college_name' => $this->college?->college_name ?? $this->college_name,
+            'college_name' => $this->college?->college_name,
             'subject' => $this->subject,
             'semester' => $this->semester,
             'mobile_number' => $this->mobile_number,

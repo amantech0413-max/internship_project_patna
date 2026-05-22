@@ -20,7 +20,6 @@ class StoreStudentRequest extends FormRequest
             'university_roll_no' => ['nullable', 'string', 'max:50'],
             'college_roll_no' => ['nullable', 'string', 'max:50'],
             'college_id' => ['nullable', 'exists:colleges,id'],
-            'college_name' => ['nullable', 'string', 'max:255'],
             'subject' => ['nullable', 'string', 'max:100'],
             'semester' => ['nullable', 'string', 'max:20'],
             'mobile' => ['required', 'digits:10'],

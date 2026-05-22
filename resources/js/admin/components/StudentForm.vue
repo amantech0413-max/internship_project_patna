@@ -29,7 +29,15 @@
         />
       </div>
       <div class="col-md-6">
-        <FormField label="College Name" :model-value="form.college_name" @update:model-value="set('college_name', $event)" />
+        <label class="form-label">College</label>
+        <select
+          class="form-select"
+          :value="form.college_id"
+          @change="set('college_id', $event.target.value)"
+        >
+          <option value="">— Select college —</option>
+          <option v-for="c in colleges" :key="c.id" :value="String(c.id)">{{ c.college_name }}</option>
+        </select>
       </div>
       <div class="col-md-6">
         <FormField label="Subject" :model-value="form.subject" @update:model-value="set('subject', $event)" />
@@ -88,6 +96,9 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import { apiFetch } from '@/api/client'
+import { unwrapList } from '@/utils/apiHelpers'
 import FormField from './FormField.vue'
 
 const props = defineProps({
@@ -97,6 +108,17 @@ const props = defineProps({
   showRejection: Boolean,
   showRegistrationNo: Boolean,
   photoPreviewUrl: String,
+})
+
+const colleges = ref([])
+
+onMounted(async () => {
+  try {
+    const res = await apiFetch('/admin/colleges/dropdown')
+    colleges.value = unwrapList(res)
+  } catch {
+    colleges.value = []
+  }
 })
 
 const emit = defineEmits(['submit', 'update:form', 'photo-selected', 'id-proof-selected'])
