@@ -12,7 +12,7 @@ const FALLBACK_ROUTE_PERMISSIONS = {
   'import-logs': 'staff_entry',
   students: 'student_view',
   'student-create': 'student_create',
-  'student-edit': 'student_edit',
+  'student-edit': 'student_view',
   'staff-users': 'staff_manage',
   bin: 'bin_manage',
 }

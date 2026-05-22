@@ -107,6 +107,17 @@ class StudentController extends Controller
         return $this->success(null, 'Student moved to recycle bin.');
     }
 
+    public function forceDestroy(int $id): JsonResponse
+    {
+        $student = Student::withTrashed()->findOrFail($id);
+
+        if (! $this->studentService->forceDelete($student)) {
+            return $this->error('Could not permanently delete student.', 500);
+        }
+
+        return $this->success(null, 'Student permanently deleted.');
+    }
+
     public function exportCsv(Request $request): StreamedResponse
     {
         $students = $this->students->paginate($request->all(), 10000);

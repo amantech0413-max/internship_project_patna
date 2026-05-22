@@ -10,12 +10,15 @@ class StudentObserver
     public function updated(Student $student): void
     {
         if ($student->wasChanged('status') && $student->status->value === 'approved') {
-            SendPushNotificationJob::dispatch(
-                $student->user_id,
-                'Registration Approved',
-                'Your internship registration has been approved.',
-                ['student_id' => $student->id]
-            );
+            // Public registrations have no login (user_id null) — push only when a user account exists
+            if ($student->user_id) {
+                SendPushNotificationJob::dispatch(
+                    $student->user_id,
+                    'Registration Approved',
+                    'Your internship registration has been approved.',
+                    ['student_id' => $student->id]
+                );
+            }
         }
     }
 }

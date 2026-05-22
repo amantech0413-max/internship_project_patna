@@ -21,6 +21,13 @@
 
     <h6 class="text-muted text-uppercase small border-bottom pb-2 mb-3">College</h6>
     <div class="row g-3 mb-4">
+      <div v-if="showRegistrationNo" class="col-md-6">
+        <FormField
+          label="Registration No"
+          :model-value="form.registration_no"
+          @update:model-value="set('registration_no', $event)"
+        />
+      </div>
       <div class="col-md-6">
         <FormField label="College Name" :model-value="form.college_name" @update:model-value="set('college_name', $event)" />
       </div>
@@ -88,6 +95,7 @@ const props = defineProps({
   errors: { type: Object, default: () => ({}) },
   showStatus: Boolean,
   showRejection: Boolean,
+  showRegistrationNo: Boolean,
   photoPreviewUrl: String,
 })
 

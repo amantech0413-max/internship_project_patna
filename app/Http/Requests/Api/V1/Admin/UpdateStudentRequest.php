@@ -17,6 +17,7 @@ class UpdateStudentRequest extends FormRequest
         $studentId = $this->route('id');
 
         return [
+            'registration_no' => ['sometimes', 'string', 'max:50', Rule::unique('students', 'registration_no')->ignore($studentId)],
             'name' => ['sometimes', 'string', 'max:255'],
             'father_name' => ['nullable', 'string', 'max:255'],
             'university_roll_no' => ['nullable', 'string', 'max:50'],

@@ -168,7 +168,10 @@ const renderActions = (row) => {
   }
   if (canApprove.value && status === 'pending') {
     html += `<button type="button" class="btn btn-sm btn-outline-success me-1" data-dt-action="approve" data-id="${id}">Approve</button>`
-    html += `<button type="button" class="btn btn-sm btn-outline-danger" data-dt-action="reject" data-id="${id}">Reject</button>`
+    html += `<button type="button" class="btn btn-sm btn-outline-danger me-1" data-dt-action="reject" data-id="${id}">Reject</button>`
+  }
+  if (canDelete.value) {
+    html += `<button type="button" class="btn btn-sm btn-outline-warning" data-dt-action="delete" data-id="${id}">To Bin</button>`
   }
   if (!html) html = '<span class="text-muted small">View only</span>'
   return html

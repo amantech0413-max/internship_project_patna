@@ -9,7 +9,7 @@ return [
         'import-logs' => StaffPermissions::STAFF_ENTRY,
         'students' => StaffPermissions::STUDENT_VIEW,
         'student-create' => StaffPermissions::STUDENT_CREATE,
-        'student-edit' => StaffPermissions::STUDENT_EDIT,
+        'student-edit' => StaffPermissions::STUDENT_VIEW,
         'staff-users' => StaffPermissions::STAFF_MANAGE,
         'bin' => StaffPermissions::BIN_MANAGE,
     ],

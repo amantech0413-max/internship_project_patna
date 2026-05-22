@@ -114,6 +114,10 @@ Route::prefix('v1')->group(function () {
                 Route::delete('students/{id}', [AdminStudentController::class, 'destroy']);
             });
 
+            Route::middleware('permission:bin_delete_permanent')->group(function () {
+                Route::delete('students/{id}/force', [AdminStudentController::class, 'forceDestroy']);
+            });
+
             Route::middleware('permission:bin_manage,bin_delete_permanent')->group(function () {
                 Route::get('bin', [BinController::class, 'index']);
             });

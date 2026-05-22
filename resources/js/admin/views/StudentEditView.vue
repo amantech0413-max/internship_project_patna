@@ -1,93 +1,112 @@
 <template>
-  <div class="max-w-3xl mx-auto w-full">
-    <div v-if="loadError" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-      <p class="text-red-700">{{ loadError }}</p>
-      <router-link to="/students" class="inline-block mt-4 text-blue-700 font-medium">← Back to Students</router-link>
+  <div>
+    <div v-if="loadError" class="alert alert-danger">
+      {{ loadError }}
+      <router-link to="/students" class="alert-link ms-2">← Back to Students</router-link>
     </div>
 
-    <div v-else-if="pending" class="text-slate-500 py-12 text-center">Loading student...</div>
+    <div v-else-if="pending" class="text-muted py-5 text-center">Loading student...</div>
 
     <template v-else-if="student">
-      <div class="flex flex-col gap-4 mb-6">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
         <div>
-          <h2 class="text-xl sm:text-2xl font-bold">Edit Student</h2>
-          <p class="text-sm text-slate-500 mt-1 break-all">
-            {{ student.student_code }}
-          </p>
-          <span class="inline-block mt-2 px-2.5 py-1 rounded text-xs font-medium uppercase" :class="statusClass">
-            {{ student.status }}
-          </span>
+          <p class="text-muted small mb-1">Edit student</p>
+          <h2 class="h5 page-title mb-1">{{ student.student_name || student.name }}</h2>
+          <p class="text-muted small mb-2">{{ student.student_code }} · {{ student.registration_no || '—' }}</p>
+          <span class="badge" :class="statusBadgeClass">{{ displayStatus }}</span>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="d-flex flex-wrap gap-2">
           <button
-            v-if="canApprove && student.status === 'pending'"
+            v-if="canApprove && displayStatus === 'pending'"
             type="button"
-            class="flex-1 sm:flex-none px-4 py-2.5 bg-green-700 text-white rounded-lg text-sm font-medium"
+            class="btn btn-sm btn-success"
             @click="approve"
           >
             Approve
           </button>
           <button
-            v-if="canApprove && student.status === 'pending'"
+            v-if="canApprove && displayStatus === 'pending'"
             type="button"
-            class="flex-1 sm:flex-none px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium"
+            class="btn btn-sm btn-outline-danger"
             @click="reject"
           >
             Reject
           </button>
+          <button
+            v-if="canSoftDelete"
+            type="button"
+            class="btn btn-sm btn-outline-warning"
+            @click="softDelete"
+          >
+            Move to Bin
+          </button>
+          <button
+            v-if="canPermanentDelete"
+            type="button"
+            class="btn btn-sm btn-danger"
+            @click="permanentDelete"
+          >
+            Delete Forever
+          </button>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl border shadow-sm p-4 sm:p-6">
-        <p v-if="!canEdit" class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
-          View only — you do not have permission to edit students.
-        </p>
-        <StudentForm
-          :form="form"
-          show-status
-          show-rejection
-          :photo-preview-url="(student.photo_url) || null"
-          @update:form="Object.assign(form, $event)"
-          @photo-selected="photoFile = $event"
-          @id-proof-selected="idProofFile = $event"
-          @submit="save"
-        >
-          <template #actions>
-            <p v-if="error" class="text-sm text-red-600 whitespace-pre-line">{{ error }}</p>
-            <p v-if="saveOk" class="text-sm text-green-700">Saved successfully.</p>
-            <div class="flex flex-col sm:flex-row gap-3 pt-4">
-              <button
-                v-if="canEdit"
-                type="submit"
-                class="w-full sm:w-auto px-6 py-3 bg-blue-700 text-white rounded-lg font-medium disabled:opacity-60"
-                :disabled="saving"
-              >
-                {{ saving ? 'Saving...' : 'Save Changes' }}
-              </button>
-              <router-link to="/students" class="w-full sm:w-auto px-6 py-3 border rounded-lg text-center">Back</router-link>
-            </div>
-          </template>
-        </StudentForm>
+      <div class="card table-card">
+        <div class="card-body">
+          <p v-if="!canEdit" class="alert alert-warning py-2 small mb-3">
+            View only — you do not have permission to edit students.
+          </p>
+          <StudentForm
+            :form="form"
+            show-status
+            show-rejection
+            show-registration-no
+            :photo-preview-url="student.photo_url || null"
+            @update:form="onFormPatch"
+            @photo-selected="photoFile = $event"
+            @id-proof-selected="idProofFile = $event"
+            @submit="save"
+          >
+            <template #actions>
+              <p v-if="error" class="text-danger small mb-2" style="white-space: pre-line">{{ error }}</p>
+              <p v-if="saveOk" class="text-success small mb-2">Saved successfully.</p>
+              <div class="d-flex flex-wrap gap-2 pt-2">
+                <button
+                  v-if="canEdit"
+                  type="submit"
+                  class="btn btn-primary"
+                  :disabled="saving"
+                >
+                  {{ saving ? 'Saving...' : 'Save Changes' }}
+                </button>
+                <router-link to="/students" class="btn btn-outline-secondary">Back to list</router-link>
+              </div>
+            </template>
+          </StudentForm>
+        </div>
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { apiFetch, apiForm, apiDownload, getPublicApi } from '@/api/client'
-import { parseApiError, unwrapList, useFetchData } from '@/utils/apiHelpers'
-import { useToastStore } from '@/stores/toast'
-import { buildStudentFormData, emptyStudentForm, studentToForm } from '@/utils/studentForm'
-import { alertError, promptText, toastSuccess } from '@/utils/swal'
+import { apiFetch, apiForm } from '@/api/client'
+import { parseApiError, useFetchData } from '@/utils/apiHelpers'
+import { buildStudentFormData, studentToForm } from '@/utils/studentForm'
+import StudentForm from '@/components/StudentForm.vue'
+import { alertError, confirmDelete, confirmDialog, promptText, toastSuccess } from '@/utils/swal'
+
 const auth = useAuthStore()
+const router = useRouter()
 const route = useRoute()
-const { can } = useAuthStore()
 
 const canEdit = computed(() => auth.can('student_edit'))
 const canApprove = computed(() => auth.can('student_approve'))
+const canSoftDelete = computed(() => auth.can('student_delete'))
+const canPermanentDelete = computed(() => auth.can('bin_delete_permanent'))
 
 const form = reactive(studentToForm({}))
 const photoFile = ref(null)
@@ -97,29 +116,43 @@ const error = ref('')
 const saveOk = ref(false)
 const loadError = ref('')
 
+const studentId = computed(() => route.params.id)
+
 const { data: student, pending, refresh, error: fetchErr } = useFetchData(async () => {
-  const res = await apiFetch(`/admin/students/${route.params.id}`)
+  const res = await apiFetch(`/admin/students/${studentId.value}`)
   Object.assign(form, studentToForm(res.data))
   return res.data
 })
 
 watch(fetchErr, (e) => {
-  if (e) loadError.value = parseApiError(e)
+  loadError.value = e ? parseApiError(e) : ''
 })
 
-const statusClass = computed(() => {
+const displayStatus = computed(() => {
   const s = student.value?.status
-  if (s === 'approved') return 'bg-green-100 text-green-800'
-  if (s === 'rejected') return 'bg-red-100 text-red-800'
-  return 'bg-yellow-100 text-yellow-800'
+  if (s && typeof s === 'object' && s.value) return s.value
+  return String(s || 'pending')
 })
+
+const statusBadgeClass = computed(() => {
+  const s = displayStatus.value
+  if (s === 'approved') return 'text-bg-success'
+  if (s === 'rejected') return 'text-bg-danger'
+  if (s === 'pending') return 'text-bg-warning'
+  return 'text-bg-secondary'
+})
+
+const onFormPatch = (patch) => {
+  Object.assign(form, patch)
+}
 
 const save = async () => {
+  if (!canEdit.value) return
   if (!form.name.trim()) {
     error.value = 'Student name is required.'
     return
   }
-  if (form.mobile && !/^\d{10}$/.test(form.mobile.replace(/\D/g, ''))) {
+  if (form.mobile && !/^\d{10}$/.test(String(form.mobile).replace(/\D/g, ''))) {
     error.value = 'Mobile must be 10 digits.'
     return
   }
@@ -128,13 +161,18 @@ const save = async () => {
   error.value = ''
   saveOk.value = false
   try {
-    await apiForm(`/admin/students/${route.params.id}/update`, buildStudentFormData(form, photoFile.value, idProofFile.value))
+    await apiForm(
+      `/admin/students/${studentId.value}/update`,
+      buildStudentFormData(form, photoFile.value, idProofFile.value)
+    )
     await refresh()
     saveOk.value = true
+    toastSuccess('Student updated.')
     photoFile.value = null
     idProofFile.value = null
   } catch (e) {
     error.value = parseApiError(e)
+    await alertError(error.value)
   } finally {
     saving.value = false
   }
@@ -142,7 +180,7 @@ const save = async () => {
 
 const approve = async () => {
   try {
-    await apiFetch(`/admin/students/${route.params.id}/approve`, { method: 'POST' })
+    await apiFetch(`/admin/students/${studentId.value}/approve`, { method: 'POST' })
     toastSuccess('Student approved.')
     await refresh()
   } catch (e) {
@@ -154,9 +192,46 @@ const reject = async () => {
   const reason = await promptText('Reject student', 'Rejection reason')
   if (!reason) return
   try {
-    await apiFetch(`/admin/students/${route.params.id}/reject`, { method: 'POST', body: { reason } })
+    await apiFetch(`/admin/students/${studentId.value}/reject`, {
+      method: 'POST',
+      body: { reason },
+    })
     toastSuccess('Student rejected.')
     await refresh()
+  } catch (e) {
+    await alertError(parseApiError(e))
+  }
+}
+
+const softDelete = async () => {
+  const ok = await confirmDialog(
+    'Move to recycle bin?',
+    'This student will be hidden from lists until restored from Recycle Bin.',
+    'Move to Bin'
+  )
+  if (!ok) return
+  try {
+    await apiFetch(`/admin/students/${studentId.value}`, { method: 'DELETE' })
+    toastSuccess('Student moved to recycle bin.')
+    router.push('/students')
+  } catch (e) {
+    await alertError(parseApiError(e))
+  }
+}
+
+const permanentDelete = async () => {
+  const ok = await confirmDelete('this student permanently')
+  if (!ok) return
+  const ok2 = await confirmDialog(
+    'Permanent delete',
+    'This cannot be undone. The student record will be removed forever.',
+    'Delete Forever'
+  )
+  if (!ok2) return
+  try {
+    await apiFetch(`/admin/students/${studentId.value}/force`, { method: 'DELETE' })
+    toastSuccess('Student permanently deleted.')
+    router.push('/students')
   } catch (e) {
     await alertError(parseApiError(e))
   }

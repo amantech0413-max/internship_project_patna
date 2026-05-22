@@ -97,6 +97,8 @@ class StudentService
 
     public function updateByAdmin(Student $student, array $data, ?UploadedFile $photo = null, ?UploadedFile $idProof = null, ?int $adminId = null): Student
     {
+        $data = $this->mapAdminPayloadToStudentColumns($data);
+
         if ($photo) {
             $data['photo_path'] = $photo->store('students/photos', 'public');
         }
@@ -165,6 +167,31 @@ class StudentService
     public function delete(Student $student): bool
     {
         return $this->students->delete($student);
+    }
+
+    public function forceDelete(Student $student): bool
+    {
+        if (! $student->trashed()) {
+            $student->delete();
+        }
+
+        return (bool) $student->forceDelete();
+    }
+
+    /** @return array<string, mixed> */
+    protected function mapAdminPayloadToStudentColumns(array $data): array
+    {
+        if (array_key_exists('name', $data)) {
+            $data['student_name'] = $data['name'];
+            unset($data['name']);
+        }
+
+        if (array_key_exists('mobile', $data)) {
+            $data['mobile_number'] = $data['mobile'];
+            unset($data['mobile']);
+        }
+
+        return $data;
     }
 
     protected function isProfileComplete(array $data, ?UploadedFile $photo, ?UploadedFile $idProof): bool
