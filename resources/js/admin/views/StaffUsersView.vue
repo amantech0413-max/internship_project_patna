@@ -123,6 +123,7 @@ import {
   statusBadge,
 } from '@/utils/serverDataTable'
 import { alertError, confirmDelete, toastSuccess } from '@/utils/swal'
+import { dtIconButton } from '@/utils/dtActions'
 
 const route = useRoute()
 const router = useRouter()
@@ -191,8 +192,20 @@ const initTable = () => {
         orderable: false,
         searchable: false,
         render: (_d, _t, row) =>
-          `<button type="button" class="btn btn-sm btn-outline-primary me-1" data-dt-action="edit" data-id="${row.id}">Edit</button>` +
-          `<button type="button" class="btn btn-sm btn-outline-danger" data-dt-action="delete" data-id="${row.id}">Delete</button>`,
+          dtIconButton({
+            action: 'edit',
+            icon: 'pencil',
+            btnClass: 'btn-outline-primary',
+            title: 'Edit staff user',
+            id: row.id,
+          }) +
+          dtIconButton({
+            action: 'delete',
+            icon: 'trash',
+            btnClass: 'btn-outline-danger',
+            title: 'Delete staff user',
+            id: row.id,
+          }),
       },
     ],
   })

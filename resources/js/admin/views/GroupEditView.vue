@@ -10,8 +10,14 @@
         </div>
         <div class="flex gap-2">
           <button class="px-3 py-1.5 text-sm border rounded-lg" @click="saveGroup">Save Changes</button>
-          <button class="px-3 py-1.5 text-sm text-red-700 border border-red-200 rounded-lg" @click="deleteGroup">
-            Delete
+          <button
+            type="button"
+            class="btn btn-sm btn-icon-action btn-outline-danger px-3"
+            title="Delete group"
+            aria-label="Delete group"
+            @click="deleteGroup"
+          >
+            <i class="bi bi-trash" />
           </button>
         </div>
       </div>

@@ -15,6 +15,7 @@ export const RESERVED_ROOT_SEGMENTS = new Set([
   'entry',
   'up',
   'health',
+  'privacy-policy',
 ])
 
 export function isAdminSpaPath(pathname = window.location.pathname) {

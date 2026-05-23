@@ -17,6 +17,11 @@ const adminBlankChildren = [
 
 const publicBlankChildren = [
   { path: '', name: 'landing', component: () => import('@/views/LandingView.vue') },
+  {
+    path: 'privacy-policy',
+    name: 'privacy-policy',
+    component: () => import('@/views/PrivacyPolicyView.vue'),
+  },
   { path: 'register', redirect: { name: 'landing' } },
   {
     path: 'register/:slug',

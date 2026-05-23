@@ -23,6 +23,7 @@ class RegistrationPaths
             'entry',
             'up',
             'health',
+            'privacy-policy',
         ];
     }
 

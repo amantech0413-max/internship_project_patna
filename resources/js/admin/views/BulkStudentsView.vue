@@ -78,12 +78,26 @@
                 >{{ row.added_by_user?.name || '—' }}</a>
                 <span v-else>{{ row.added_by_user?.name || '—' }}</span>
               </td>
-              <td v-if="canEdit || canDelete">
-                <button v-if="canEdit" type="button" class="btn btn-sm btn-outline-primary me-1" @click="openEdit(row)">
-                  Edit
+              <td v-if="canEdit || canDelete" class="text-nowrap">
+                <button
+                  v-if="canEdit"
+                  type="button"
+                  class="btn btn-sm btn-icon-action btn-outline-primary"
+                  title="Edit entry"
+                  aria-label="Edit entry"
+                  @click="openEdit(row)"
+                >
+                  <i class="bi bi-pencil" />
                 </button>
-                <button v-if="canDelete" type="button" class="btn btn-sm btn-outline-danger" @click="remove(row)">
-                  Delete
+                <button
+                  v-if="canDelete"
+                  type="button"
+                  class="btn btn-sm btn-icon-action btn-outline-danger"
+                  title="Delete entry"
+                  aria-label="Delete entry"
+                  @click="remove(row)"
+                >
+                  <i class="bi bi-trash" />
                 </button>
               </td>
             </tr>

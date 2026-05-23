@@ -26,6 +26,8 @@ export async function fetchPublicSiteSettings(force = false) {
         registration_fee_amount: 0,
         upi_id: null,
         upi_qr_url: null,
+        support_contact_number: null,
+        support_email: null,
       }
       return cache.value
     } finally {

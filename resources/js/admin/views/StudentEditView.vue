@@ -13,40 +13,55 @@
           <p class="text-muted small mb-1">Edit student</p>
           <h2 class="h5 page-title mb-1">{{ student.student_name || student.name }}</h2>
           <p class="text-muted small mb-2">{{ student.student_code }} · {{ student.registration_no || '—' }}</p>
-          <span class="badge" :class="statusBadgeClass">{{ displayStatus }}</span>
+          <span
+            class="status-icon-badge d-inline-flex"
+            :class="statusMeta.colorClass"
+            :title="statusMeta.title"
+            :aria-label="statusMeta.title"
+          >
+            <i :class="['bi', `bi-${statusMeta.icon}`]" style="font-size: 1.35rem" />
+          </span>
         </div>
         <div class="d-flex flex-wrap gap-2">
           <button
             v-if="canApprove && displayStatus === 'pending'"
             type="button"
-            class="btn btn-sm btn-success"
+            class="btn btn-sm btn-icon-action btn-success"
+            title="Approve student"
+            aria-label="Approve student"
             @click="approve"
           >
-            Approve
+            <i class="bi bi-check-circle" />
           </button>
           <button
             v-if="canApprove && displayStatus === 'pending'"
             type="button"
-            class="btn btn-sm btn-outline-danger"
+            class="btn btn-sm btn-icon-action btn-outline-danger"
+            title="Reject student"
+            aria-label="Reject student"
             @click="reject"
           >
-            Reject
+            <i class="bi bi-x-circle" />
           </button>
           <button
             v-if="canSoftDelete"
             type="button"
-            class="btn btn-sm btn-outline-warning"
+            class="btn btn-sm btn-icon-action btn-outline-warning"
+            title="Move to recycle bin"
+            aria-label="Move to recycle bin"
             @click="softDelete"
           >
-            Move to Bin
+            <i class="bi bi-trash" />
           </button>
           <button
             v-if="canPermanentDelete"
             type="button"
-            class="btn btn-sm btn-danger"
+            class="btn btn-sm btn-icon-action btn-danger"
+            title="Delete permanently"
+            aria-label="Delete permanently"
             @click="permanentDelete"
           >
-            Delete Forever
+            <i class="bi bi-trash-fill" />
           </button>
         </div>
       </div>
@@ -104,6 +119,7 @@ import { parseApiError, useFetchData } from '@/utils/apiHelpers'
 import { buildStudentFormData, studentToForm } from '@/utils/studentForm'
 import StudentForm from '@/components/StudentForm.vue'
 import { alertError, confirmDelete, confirmDialog, promptText, toastSuccess } from '@/utils/swal'
+import { getStudentStatusMeta } from '@/utils/dtActions'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -152,13 +168,7 @@ const displayStatus = computed(() => {
   return String(s || 'pending')
 })
 
-const statusBadgeClass = computed(() => {
-  const s = displayStatus.value
-  if (s === 'approved') return 'text-bg-success'
-  if (s === 'rejected') return 'text-bg-danger'
-  if (s === 'pending') return 'text-bg-warning'
-  return 'text-bg-secondary'
-})
+const statusMeta = computed(() => getStudentStatusMeta(displayStatus.value))
 
 const onFormPatch = (patch) => {
   Object.assign(form, patch)

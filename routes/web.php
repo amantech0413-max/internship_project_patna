@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Route;
 | Admin panel: /admin/login, /admin/dashboard, ...
 */
 
+Route::get('/privacy-policy', function () {
+    return view('admin');
+});
+
 Route::get('/register/{slug?}', function () {
     return view('admin');
 })->where('slug', '[a-z0-9\-]+');

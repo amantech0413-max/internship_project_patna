@@ -58,18 +58,12 @@
       </div>
     </section>
 
-    <footer class="register-footer landing-footer">
-      <div class="register-footer-inner">
-        <span class="register-footer-trust">
-          <i class="bi bi-shield-check" /> Secure • Reliable • Future Ready
-        </span>
-        <span>© {{ year }} M/s Bhagya Laxmi. All rights reserved.</span>
-      </div>
-    </footer>
+    <RegisterFooter />
   </div>
 </template>
 
 <script setup>
+import RegisterFooter from '@/components/RegisterFooter.vue'
 import '../../../css/register.css'
 
 defineProps({
@@ -86,6 +80,4 @@ defineProps({
   isLanding: { type: Boolean, default: false },
   showFeatures: { type: Boolean, default: true },
 })
-
-const year = new Date().getFullYear()
 </script>

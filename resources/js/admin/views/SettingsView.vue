@@ -1,8 +1,8 @@
 <template>
   <div>
-    <p class="text-muted small mb-3">Organization branding, UPI payment details, and registration fee.</p>
+    <p class="text-muted small mb-3">Organization branding, UPI payment details, registration fee, and privacy policy.</p>
 
-    <div class="card table-card shadow-sm" style="max-width: 42rem">
+    <div class="card table-card shadow-sm mb-4" style="max-width: 42rem">
       <div class="card-body">
         <form @submit.prevent="save">
           <div class="mb-3">
@@ -12,6 +12,28 @@
           <div class="mb-3">
             <label class="form-label">Address</label>
             <textarea v-model="form.organization_address" class="form-control" rows="2" />
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Support Helpline Number</label>
+              <input
+                v-model="form.support_contact_number"
+                class="form-control"
+                placeholder="e.g. 9876543210"
+                maxlength="30"
+              />
+              <div class="form-text">Shown in site footer when filled.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Support Email</label>
+              <input
+                v-model="form.support_email"
+                type="email"
+                class="form-control"
+                placeholder="support@example.com"
+              />
+              <div class="form-text">Shown in site footer when filled.</div>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Registration Fee (₹)</label>
@@ -55,11 +77,25 @@
         </form>
       </div>
     </div>
+
+    <div class="card table-card shadow-sm" style="max-width: 56rem">
+      <div class="card-body">
+        <h2 class="h6 fw-bold mb-2">Privacy Policy</h2>
+        <p class="text-muted small mb-3">
+          Content shown at <code>/privacy-policy</code>. Use the editor for formatting, lists, links, images, and video.
+        </p>
+        <RichTextEditor v-model="form.privacy_policy_html" placeholder="Write your privacy policy..." />
+        <button type="button" class="btn btn-primary mt-3" :disabled="savingPrivacy" @click="savePrivacy">
+          {{ savingPrivacy ? 'Saving...' : 'Save Privacy Policy' }}
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
+import RichTextEditor from '@/components/RichTextEditor.vue'
 import { apiFetch } from '@/api/client'
 import { parseApiError } from '@/utils/apiHelpers'
 import { useToastStore } from '@/stores/toast'
@@ -67,6 +103,7 @@ import { clearSiteSettingsCache } from '@/composables/useSiteSettings'
 
 const toast = useToastStore()
 const saving = ref(false)
+const savingPrivacy = ref(false)
 const error = ref('')
 
 const form = reactive({
@@ -74,6 +111,9 @@ const form = reactive({
   organization_address: '',
   upi_id: '',
   registration_fee_amount: '0',
+  privacy_policy_html: '',
+  support_contact_number: '',
+  support_email: '',
 })
 
 const preview = reactive({ logo: '', qr: '' })
@@ -95,6 +135,9 @@ const load = async () => {
     stored.qr = d.upi_qr || ''
     preview.logo = d.organization_logo_url || ''
     preview.qr = d.upi_qr_url || ''
+    form.privacy_policy_html = d.privacy_policy_html || ''
+    form.support_contact_number = d.support_contact_number || ''
+    form.support_email = d.support_email || ''
   } catch (e) {
     error.value = parseApiError(e)
   }
@@ -133,6 +176,8 @@ const save = async () => {
     fd.append('organization_address', form.organization_address)
     fd.append('upi_id', form.upi_id)
     fd.append('registration_fee_amount', form.registration_fee_amount)
+    fd.append('support_contact_number', form.support_contact_number)
+    fd.append('support_email', form.support_email)
     if (logoFile.value) fd.append('organization_logo', logoFile.value)
     if (qrFile.value) fd.append('upi_qr', qrFile.value)
     if (removeLogoFlag.value) fd.append('remove_logo', '1')
@@ -162,6 +207,24 @@ const onLogoImgError = () => {
 const onQrImgError = () => {
   preview.qr = ''
   error.value = 'QR image could not be loaded. Re-upload or run: php artisan storage:link'
+}
+
+const savePrivacy = async () => {
+  savingPrivacy.value = true
+  error.value = ''
+  try {
+    const fd = new FormData()
+    fd.append('privacy_policy_html', form.privacy_policy_html || '')
+    await apiFetch('/admin/settings', { method: 'POST', body: fd })
+    clearSiteSettingsCache()
+    toast.show('Privacy policy saved.', 'success')
+    await load()
+  } catch (e) {
+    error.value = parseApiError(e)
+    toast.show(error.value, 'danger')
+  } finally {
+    savingPrivacy.value = false
+  }
 }
 
 onMounted(load)

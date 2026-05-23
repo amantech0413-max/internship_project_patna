@@ -19,6 +19,14 @@ class PublicRegistrationController extends Controller
         return $this->success($this->settings->publicPaymentDisplay());
     }
 
+    public function privacyPolicy(): JsonResponse
+    {
+        return $this->success([
+            'title' => 'Privacy Policy',
+            'content_html' => $this->settings->privacyPolicyHtml(),
+        ]);
+    }
+
     public function colleges(): JsonResponse
     {
         return $this->success(

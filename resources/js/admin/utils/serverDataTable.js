@@ -178,6 +178,7 @@ export function statusBadge(status) {
   let cls = 'text-bg-secondary'
   if (s === 'pending') cls = 'text-bg-warning'
   else if (s === 'approved' || s === 'active') cls = 'text-bg-success'
+  else if (s === 'completed') cls = 'text-bg-primary'
   else if (s === 'rejected') cls = 'text-bg-danger'
   else if (s === 'inactive') cls = 'text-bg-secondary'
   return `<span class="badge ${cls}">${s || '—'}</span>`

@@ -119,14 +119,7 @@
       </div>
     </section>
 
-    <footer class="register-footer landing-footer">
-      <div class="register-footer-inner">
-        <span class="register-footer-trust">
-          <i class="bi bi-shield-check" /> Secure • Reliable • Future Ready
-        </span>
-        <span>© {{ year }} M/s Bhagya Laxmi. All rights reserved.</span>
-      </div>
-    </footer>
+    <RegisterFooter />
   </div>
 </template>
 
@@ -135,6 +128,7 @@ import { computed, onMounted, ref } from 'vue'
 import { getPublicApi } from '@/api/client'
 import { collegeRegisterRoute } from '@/utils/registrationPaths'
 import { fetchPublicSiteSettings } from '@/composables/useSiteSettings'
+import RegisterFooter from '@/components/RegisterFooter.vue'
 import '../../../css/register.css'
 
 const siteSettings = ref({})
@@ -142,8 +136,6 @@ const colleges = ref([])
 const collegeSearch = ref('')
 const loading = ref(true)
 const loadError = ref('')
-const year = new Date().getFullYear()
-
 const collegeLabel = (c) => String(c?.short_name || c?.name || '').trim()
 
 const filteredColleges = computed(() => {

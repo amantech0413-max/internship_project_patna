@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use App\Support\HtmlSanitizer;
 use App\Support\SiteSettings;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -41,7 +42,16 @@ class SiteSettingService
             $value = $this->normalizeFilenameForStorage($value, $key === SiteSettings::ORGANIZATION_LOGO ? self::LOGO_DIR : self::QR_DIR);
         }
 
+        if ($key === SiteSettings::PRIVACY_POLICY_HTML) {
+            $value = HtmlSanitizer::clean($value);
+        }
+
         Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+    }
+
+    public function privacyPolicyHtml(): ?string
+    {
+        return $this->get(SiteSettings::PRIVACY_POLICY_HTML);
     }
 
     public function registrationFeeAmount(): float
@@ -57,6 +67,8 @@ class SiteSettingService
             'organization_address' => $this->get(SiteSettings::ORGANIZATION_ADDRESS),
             'organization_logo_url' => $this->logoUrl(),
             'registration_fee_amount' => $this->registrationFeeAmount(),
+            'support_contact_number' => $this->get(SiteSettings::SUPPORT_CONTACT_NUMBER),
+            'support_email' => $this->get(SiteSettings::SUPPORT_EMAIL),
         ];
     }
 
@@ -84,6 +96,9 @@ class SiteSettingService
             'organization_logo_url' => $this->logoUrl(),
             'upi_qr' => $qrFile,
             'upi_qr_url' => $this->qrUrl(),
+            'privacy_policy_html' => $this->privacyPolicyHtml(),
+            'support_contact_number' => $this->get(SiteSettings::SUPPORT_CONTACT_NUMBER),
+            'support_email' => $this->get(SiteSettings::SUPPORT_EMAIL),
         ];
     }
 
@@ -95,6 +110,9 @@ class SiteSettingService
             SiteSettings::ORGANIZATION_ADDRESS,
             SiteSettings::UPI_ID,
             SiteSettings::REGISTRATION_FEE_AMOUNT,
+            SiteSettings::PRIVACY_POLICY_HTML,
+            SiteSettings::SUPPORT_CONTACT_NUMBER,
+            SiteSettings::SUPPORT_EMAIL,
         ] as $key) {
             if (array_key_exists($key, $input)) {
                 $this->set($key, $input[$key] !== null ? trim((string) $input[$key]) : null);

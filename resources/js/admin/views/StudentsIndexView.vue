@@ -44,6 +44,7 @@
               <option value="pending">Pending</option>
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
           <div class="admin-filter-field">
@@ -108,8 +109,8 @@ import {
   reloadDataTable,
   destroyDataTable,
   formatDateTime,
-  statusBadge,
 } from '@/utils/serverDataTable'
+import { dtIconButton, studentStatusIcon } from '@/utils/dtActions'
 import { alertError, confirmDelete, confirmDialog, promptText, toastSuccess } from '@/utils/swal'
 import { parseApiError, unwrapList } from '@/utils/apiHelpers'
 import { useToastStore } from '@/stores/toast'
@@ -171,16 +172,40 @@ const renderActions = (row) => {
   const status = rowStatus(row)
   let html = ''
   if (canEdit.value) {
-    html += `<button type="button" class="btn btn-sm btn-outline-primary me-1" data-dt-action="edit" data-id="${id}">Edit</button>`
+    html += dtIconButton({
+      action: 'edit',
+      icon: 'pencil',
+      btnClass: 'btn-outline-primary',
+      title: 'Edit student',
+      id,
+    })
   }
   if (canApprove.value && status === 'pending') {
-    html += `<button type="button" class="btn btn-sm btn-outline-success me-1" data-dt-action="approve" data-id="${id}">Approve</button>`
-    html += `<button type="button" class="btn btn-sm btn-outline-danger me-1" data-dt-action="reject" data-id="${id}">Reject</button>`
+    html += dtIconButton({
+      action: 'approve',
+      icon: 'check-circle',
+      btnClass: 'btn-outline-success',
+      title: 'Approve student',
+      id,
+    })
+    html += dtIconButton({
+      action: 'reject',
+      icon: 'x-circle',
+      btnClass: 'btn-outline-danger',
+      title: 'Reject student',
+      id,
+    })
   }
   if (canDelete.value) {
-    html += `<button type="button" class="btn btn-sm btn-outline-warning" data-dt-action="delete" data-id="${id}">To Bin</button>`
+    html += dtIconButton({
+      action: 'delete',
+      icon: 'trash',
+      btnClass: 'btn-outline-warning',
+      title: 'Move to recycle bin',
+      id,
+    })
   }
-  if (!html) html = '<span class="text-muted small">View only</span>'
+  if (!html) html = '<span class="text-muted small">—</span>'
   return html
 }
 
@@ -226,7 +251,8 @@ const initTable = () => {
       { data: 'internship_mode', defaultContent: '—' },
       {
         data: 'status',
-        render: (data) => statusBadge(rowStatus({ status: data })),
+        className: 'text-center',
+        render: (data, _t, row) => studentStatusIcon(rowStatus({ status: data ?? row?.status })),
       },
       {
         data: 'added_by_user',

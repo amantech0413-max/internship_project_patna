@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::get('registration/settings', [PublicRegistrationController::class, 'settings']);
+    Route::get('registration/privacy-policy', [PublicRegistrationController::class, 'privacyPolicy']);
     Route::get('registration/colleges', [PublicRegistrationController::class, 'colleges']);
     Route::get('registration/colleges/{slug}', [PublicRegistrationController::class, 'collegeBySlug']);
 

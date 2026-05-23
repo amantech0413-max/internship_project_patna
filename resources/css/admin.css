@@ -238,3 +238,62 @@ table.dataTable tbody td {
     flex: 1 1 100%;
   }
 }
+
+.btn-icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.btn-icon-action + .btn-icon-action {
+  margin-left: 0.25rem;
+}
+
+.college-reg-links .college-reg-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.college-reg-links .college-reg-link-row:last-child {
+  margin-bottom: 0;
+}
+
+.college-reg-links .college-reg-link-label {
+  flex: 0 0 auto;
+  min-width: 5.5rem;
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.college-reg-links .college-reg-link-url {
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-all;
+  font-size: 0.8125rem;
+}
+
+.college-reg-links .college-reg-link-actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 0.25rem;
+}
+
+.status-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.status-icon-badge .bi {
+  pointer-events: none;
+}

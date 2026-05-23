@@ -75,20 +75,55 @@
                   Leave empty to auto-generate from college name. On edit, slug stays the same unless you change it here manually.
                 </p>
               </div>
-              <div v-if="registrationUrls.short" class="col-12 small text-muted">
-                <p class="mb-1 fw-medium">Registration links (all open the same form):</p>
-                <p class="mb-1">
-                  Short:
-                  <a :href="registrationUrls.short" target="_blank" rel="noopener">{{ registrationUrls.short }}</a>
-                </p>
-                <p class="mb-1">
-                  /register/:
-                  <a :href="registrationUrls.register" target="_blank" rel="noopener">{{ registrationUrls.register }}</a>
-                </p>
-                <p class="mb-0">
-                  /admin/register/:
-                  <a :href="registrationUrls.admin" target="_blank" rel="noopener">{{ registrationUrls.admin }}</a>
-                </p>
+              <div v-if="registrationUrls.short" class="col-12 college-reg-links small">
+                <p class="mb-2 fw-medium text-muted">Registration links (all open the same form):</p>
+                <div class="college-reg-link-row">
+                  <span class="college-reg-link-label">Short:</span>
+                  <a
+                    :href="registrationUrls.short"
+                    class="college-reg-link-url"
+                    target="_blank"
+                    rel="noopener"
+                  >{{ registrationUrls.short }}</a>
+                  <span class="college-reg-link-actions">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-icon-action btn-outline-secondary"
+                      title="Copy short link"
+                      aria-label="Copy short link"
+                      @click="copyShortLink"
+                    >
+                      <i class="bi bi-clipboard" />
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-icon-action btn-outline-info"
+                      title="Share short link"
+                      aria-label="Share short link"
+                      @click="shareShortLink"
+                    >
+                      <i class="bi bi-share" />
+                    </button>
+                  </span>
+                </div>
+                <div class="college-reg-link-row">
+                  <span class="college-reg-link-label">/register/:</span>
+                  <a
+                    :href="registrationUrls.register"
+                    class="college-reg-link-url"
+                    target="_blank"
+                    rel="noopener"
+                  >{{ registrationUrls.register }}</a>
+                </div>
+                <div class="college-reg-link-row">
+                  <span class="college-reg-link-label">/admin/register/:</span>
+                  <a
+                    :href="registrationUrls.admin"
+                    class="college-reg-link-url"
+                    target="_blank"
+                    rel="noopener"
+                  >{{ registrationUrls.admin }}</a>
+                </div>
               </div>
               <div class="col-12">
                 <label class="form-label">Address</label>
@@ -136,6 +171,8 @@ import {
 } from '@/utils/serverDataTable'
 import { alertError, confirmDelete, toastSuccess } from '@/utils/swal'
 import { collegeRegistrationPath } from '@/utils/registrationPaths'
+import { copyCollegeShortLink, shareCollegeShortLink } from '@/utils/linkActions'
+import { dtIconButton } from '@/utils/dtActions'
 
 const modalEl = ref(null)
 const tableRef = ref(null)
@@ -168,6 +205,11 @@ const registrationUrls = computed(() => {
     admin: collegeRegistrationPath(s, 'admin'),
   }
 })
+
+const copyShortLink = () => copyCollegeShortLink(String(form.slug || '').trim())
+
+const shareShortLink = () =>
+  shareCollegeShortLink(String(form.slug || '').trim(), form.college_name || 'Registration link')
 
 const getFilterParams = () => {
   const params = {}
@@ -211,9 +253,44 @@ const initTable = () => {
         data: null,
         orderable: false,
         searchable: false,
-        render: (_d, _t, row) =>
-          `<button type="button" class="btn btn-sm btn-outline-primary me-1" data-dt-action="edit" data-id="${row.id}">Edit</button>` +
-          `<button type="button" class="btn btn-sm btn-outline-danger" data-dt-action="delete" data-id="${row.id}">Delete</button>`,
+        className: 'text-nowrap',
+        render: (_d, _t, row) => {
+          const slug = String(row.slug || '').trim()
+          let html = ''
+          if (slug) {
+            html += dtIconButton({
+              action: 'copy-link',
+              icon: 'clipboard',
+              btnClass: 'btn-outline-secondary',
+              title: 'Copy short registration link',
+              id: row.id,
+              slug,
+            })
+            html += dtIconButton({
+              action: 'share-link',
+              icon: 'share',
+              btnClass: 'btn-outline-info',
+              title: 'Share short registration link',
+              id: row.id,
+              slug,
+            })
+          }
+          html += dtIconButton({
+            action: 'edit',
+            icon: 'pencil',
+            btnClass: 'btn-outline-primary',
+            title: 'Edit college',
+            id: row.id,
+          })
+          html += dtIconButton({
+            action: 'delete',
+            icon: 'trash',
+            btnClass: 'btn-outline-danger',
+            title: 'Delete college',
+            id: row.id,
+          })
+          return html
+        },
       },
     ],
   })
@@ -223,6 +300,16 @@ const onTableClick = async (e) => {
   const btn = e.target.closest('[data-dt-action]')
   if (!btn) return
   const id = Number(btn.dataset.id)
+  const slug = String(btn.dataset.slug || '').trim()
+
+  if (btn.dataset.dtAction === 'copy-link') {
+    if (slug) await copyCollegeShortLink(slug)
+    return
+  }
+  if (btn.dataset.dtAction === 'share-link') {
+    if (slug) await shareCollegeShortLink(slug)
+    return
+  }
   if (btn.dataset.dtAction === 'edit') {
     try {
       const res = await apiFetch(`/admin/colleges/${id}`)

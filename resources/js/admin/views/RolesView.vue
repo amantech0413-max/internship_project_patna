@@ -101,6 +101,7 @@ import {
   destroyDataTable,
 } from '@/utils/serverDataTable'
 import { alertError, confirmDelete, toastSuccess } from '@/utils/swal'
+import { dtIconButton } from '@/utils/dtActions'
 
 const tableRef = ref(null)
 let dt = null
@@ -159,8 +160,20 @@ const initTable = () => {
         render: (_d, _t, row) => {
           if (row.is_system) return '<span class="text-muted small">System</span>'
           return (
-            `<button type="button" class="btn btn-sm btn-outline-primary me-1" data-dt-action="edit" data-id="${row.id}">Edit</button>` +
-            `<button type="button" class="btn btn-sm btn-outline-danger" data-dt-action="delete" data-id="${row.id}">Delete</button>`
+            dtIconButton({
+              action: 'edit',
+              icon: 'pencil',
+              btnClass: 'btn-outline-primary',
+              title: 'Edit role',
+              id: row.id,
+            }) +
+            dtIconButton({
+              action: 'delete',
+              icon: 'trash',
+              btnClass: 'btn-outline-danger',
+              title: 'Delete role',
+              id: row.id,
+            })
           )
         },
       },

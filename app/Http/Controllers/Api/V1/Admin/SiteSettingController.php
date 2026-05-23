@@ -27,6 +27,9 @@ class SiteSettingController extends Controller
             'upi_qr' => ['nullable', 'image', 'max:2048'],
             'remove_logo' => ['sometimes', 'boolean'],
             'remove_upi_qr' => ['sometimes', 'boolean'],
+            'privacy_policy_html' => ['nullable', 'string', 'max:65535'],
+            'support_contact_number' => ['nullable', 'string', 'max:30'],
+            'support_email' => ['nullable', 'email', 'max:255'],
         ]);
 
         $this->settings->updateText($request->only([
@@ -34,6 +37,9 @@ class SiteSettingController extends Controller
             'organization_address',
             'upi_id',
             'registration_fee_amount',
+            'privacy_policy_html',
+            'support_contact_number',
+            'support_email',
         ]));
 
         if ($request->boolean('remove_logo')) {

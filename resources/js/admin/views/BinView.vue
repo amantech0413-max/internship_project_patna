@@ -64,6 +64,7 @@ import {
   formatDateTime,
 } from '@/utils/serverDataTable'
 import { alertError, confirmDelete, confirmDialog, toastSuccess } from '@/utils/swal'
+import { dtIconButton } from '@/utils/dtActions'
 
 const auth = useAuthStore()
 const tableRef = ref(null)
@@ -82,14 +83,29 @@ const getFilterParams = () => {
 }
 
 const renderActions = (row) => {
+  const typeAttr = `data-type="${String(row.type || '').replace(/"/g, '&quot;')}"`
   let html = ''
   if (canRestore.value) {
-    html += `<button type="button" class="btn btn-sm btn-outline-success me-1" data-dt-action="restore" data-type="${row.type}" data-id="${row.id}">Restore</button>`
+    html += dtIconButton({
+      action: 'restore',
+      icon: 'arrow-counterclockwise',
+      btnClass: 'btn-outline-success',
+      title: 'Restore',
+      id: row.id,
+      extraAttrs: typeAttr,
+    })
   }
   if (canForceDelete.value) {
-    html += `<button type="button" class="btn btn-sm btn-outline-danger" data-dt-action="force-delete" data-type="${row.type}" data-id="${row.id}">Delete Forever</button>`
+    html += dtIconButton({
+      action: 'force-delete',
+      icon: 'trash',
+      btnClass: 'btn-outline-danger',
+      title: 'Delete permanently',
+      id: row.id,
+      extraAttrs: typeAttr,
+    })
   }
-  if (!html) html = '<span class="text-muted small">No actions</span>'
+  if (!html) html = '<span class="text-muted small">—</span>'
   return html
 }
 
